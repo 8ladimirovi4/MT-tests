@@ -1,0 +1,26 @@
+
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+}
+.CodeMirror{
+  height: 300px;
+  width: 700px;
+  border: solid 1px lightgrey;
+  height: auto;
+}
+
+.breakpoints {width: .8em;}
+.breakpoint { color: #822; }
+.CodeMirror {border: 1px solid #aaa;}
+
+.modalHidden{
+  visibility: hidden;
+}
+
+.modalViaible{
+  visibility: visible;
+}

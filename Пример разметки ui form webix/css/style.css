@@ -1,0 +1,17 @@
+.my-fieldset {
+  border-bottom: 1px solid #ccc !important; /* Цвет и толщина нижней границы */
+  margin-top: 5px !important;
+  margin-bottom: 5px !important;
+}
+
+#fooo{
+  width: 300px;
+}
+
+#fooo1{
+  width: 300px;
+}
+
+#fooo2{
+  width: 300px;
+}
