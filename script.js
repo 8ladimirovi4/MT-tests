@@ -3,6 +3,10 @@ const data = []
 
 var datatable = webix.ui({
     container: 'data_table',
+    view: 'layout',
+rows:[
+    {
+    container: 'data_table',
     view:"datatable", 
     id:'dt',
     autoheight: true,
@@ -38,6 +42,7 @@ var datatable = webix.ui({
         
 
     },
+}]
 });
 
-$$('dt').adjustRowHeight();
+//$$('dt').adjustRowHeight();
