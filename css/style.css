@@ -1,0 +1,18 @@
+.container{
+    border: 3px solid rebeccapurple;
+    display: inline-block;
+    height: 3480px;
+}
+.content{
+    font-size: xx-large;
+    width: 300px;
+    min-height: 3480px;
+    border: 3px solid green;
+    overflow: hidden;
+}
+
+@media print{
+    .container{
+        display: contents;
+    }
+}
