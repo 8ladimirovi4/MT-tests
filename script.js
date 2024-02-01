@@ -1,27 +1,3 @@
-// const array = [1,2,3,4,5,6,7,8,9,10]
-
-
-// for (let index = 0; index < array.length; index++) {
-//     //console.count('Итерация')
-// }
-
-// console.table({ name: "John", age: 30, city: "New York" });
-
-// console.group("Группа 1");
-// console.log("Сообщение в группе 1");
-// console.log("Еще одно сообщение в группе 1");
-// console.groupEnd();
-
-// console.log("Это снова обычное сообщение вне группы");
-
-// console.group("Группа 2");
-// console.log("Сообщение в группе 2");
-// console.group("Вложенная группа");
-// console.log("Сообщение во вложенной группе");
-// console.groupEnd();
-
-
-
 //Поднятие (hoisting)
 
 //Стадии разбора кода
@@ -133,36 +109,6 @@ const myObj = {
 
 //console.log(' ===> ', myObj[2])
 
-//Задачки
-
-// Создать случайное число от 1 до 10
-//Если выпадает число от 1 до 3 включително вывести в консоль "ДЖЕКПОТ!!!"
-//Если выпадает число от 4 до 7  включително вывести в консоль "ТЕБЕ ПОЧТИ ПОВЕЗЛО"
-//Если выпадает число от 8 до 10  включително вывести в консоль "ХОЛОДНО"
-
-const min = 1
-const max = 10
-const random = Math.round(Math.random() * (max - min) + min)
-
-if(random >= 1 && random <=3){
-    //console.log(' ===> ', "ДЖЕКПОТ")
-}else if(random >= 4 && random <=7){
-    //console.log(' ===> ', "Почти")
-}else{
-   // console.log(' ===> ', "Холодно")
-}
-
-//Что будет в консоли?
-if (5 > 7) {
-    //console.log('Да, пойду гулять')
-  } else if (8 === 88) {
-    //console.log(5 + 5)
-  } else if ( 77 === 77) {
-    const a = 77 + 77
-     //console.log(a)
-
-  }
-
 //читаем код
 function GetSum( a,b )
 {
@@ -176,5 +122,39 @@ function GetSum( a,b )
   return result;
 }
 
-console.log(GetSum(10, 13))
+//console.log(GetSum(10, 13))
+
+const foo = 5
+
+const message = foo == 4 ? 'а = 4' : foo == 3 ? 'a = 3' : foo == 6 ? 'a = 6' : null
+
+//console.log('===> ', message)
+
+const dayOfWeek = 'Tuesday';
+
+switch (dayOfWeek) {
+    case 'Monday':
+    case 'Tuesday':
+    case 'Wednesday':
+    case 'Thursday':
+    case 'Friday':
+        //console.log('Working day');
+        break;
+
+    case 'Saturday':
+    case 'Sunday':
+        //console.log('Weekend');
+        break;
+
+    default:
+        //console.log('Invalid day');
+}
+
+const numberArr = [1,2,3,4,5]
+
+for(value of numberArr){
+    //console.log('===> ', value)
+}
+
+
 
