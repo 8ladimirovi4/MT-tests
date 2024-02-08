@@ -156,5 +156,3 @@ for(value of numberArr){
     //console.log('===> ', value)
 }
 
-
-

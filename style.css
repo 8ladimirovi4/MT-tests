@@ -19,3 +19,13 @@ opacity: 0.5;
     width: 200px;
     height: 200px;
 }
+
+.hidden{
+    display: none;
+}
+
+.person{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
