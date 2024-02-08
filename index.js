@@ -38,35 +38,32 @@ body.prepend(spanName)
 })
 
 let intervalSet = null
+const body = document.querySelector('body')
+const div = document.querySelector('.render')
+const loadingH1 = document.querySelector('.hidden_h1')
+const btnReq = document.querySelector('.request')
+
 function clearContent(selector){
-    const loadings = document.querySelectorAll('.' + selector)
-    loadings.forEach(loading => {
-        loading.remove()
-    })
+    const loading = document.querySelector('.' + selector)
+    loading.classList = 'hidden_h1'
 }
-function liading(body){
+
+function liading(){
     let loadingContent = 'Loading'
     const dot = '.'
         intervalSet = setInterval(() => {
         loadingContent += dot
         if(loadingContent.length > 15) loadingContent = 'Loading'
-   
-        clearContent('loading_content')
-
-        const loading = document.createElement('h1')
-        loading.classList = 'loading_content'
-        loading.textContent = loadingContent
-        body.append(loading)
+        loadingH1.innerHTML = loadingContent
     },500)  
 }
 
-const btnReq = document.querySelector('.request')
-btnReq.addEventListener('click', (e) => {
-    const body = document.querySelector('body')
-    liading(body)
-    const div = document.createElement('div')
-    div.classList = 'text_content'
-    clearContent('text_content')
+function getData() {
+    loadingH1.classList = 'visible_h1'
+    div.innerHTML = null
+    
+liading(body)
+
   setTimeout(() => {
     fetch('https://catfact.ninja/fact')
     .then(res => {
@@ -78,14 +75,16 @@ btnReq.addEventListener('click', (e) => {
     })
     .then(data => {
             div.innerHTML = data.fact
-            body.append(div)
     })
     .catch(err => console.log('error description', err))
     .finally(() => {
         clearInterval(intervalSet)
-        clearContent('loading_content')
+        clearContent('visible_h1')
     })
   }, 6000)
-    
-})
+}
+
+
+btnReq.addEventListener('click', getData)
+
 

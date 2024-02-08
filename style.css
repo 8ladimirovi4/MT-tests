@@ -24,6 +24,12 @@ opacity: 0.5;
     display: none;
 }
 
+.hidden_h1{
+    display: none;
+}
+.visible{
+    display:block
+}
 .person{
     display: flex;
     align-items: center;
