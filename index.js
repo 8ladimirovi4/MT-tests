@@ -83,8 +83,30 @@ liading(body)
     })
   }, 6000)
 }
+let boo = true
+
+function bool(){
+
+boo = !boo
+console.log('===> ', boo)
+}
+
+btnReq.addEventListener('click', () => bool())
+
+//создать новый массив с зеркальными данными путем вызова рекурсии
+const arr = [1,2,3,4,5,6,7]
+function getItemsFromArray(arr, reversedArray = [], index = arr.length - 1){
+    if(reversedArray.length === arr.length) {
+        return reversedArray
+    }
+    reversedArray.push(arr[index])
+    index -= 1
+    return getItemsFromArray(arr, reversedArray, index)
+}
+console.log('===> arr',arr )
+console.log('===> getItemsFromArray(arr)', getItemsFromArray(arr)) 
 
 
-btnReq.addEventListener('click', getData)
+
 
 
