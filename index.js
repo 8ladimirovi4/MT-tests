@@ -107,6 +107,52 @@ console.log('===> arr',arr )
 console.log('===> getItemsFromArray(arr)', getItemsFromArray(arr)) 
 
 
+const foo = () => {
+    console.log('===> onblur works', )
+}
 
+
+
+const BTN_GET = document.querySelector('.get')
+const BTN_SET = document.querySelector('.set')
+const BRN_DEL = document.querySelector('.del')
+
+
+function setWithExpiry(key, value, ttl) {
+    const now = new Date();
+    const item = {
+        value: value,
+        expiry: now.getTime() + ttl,
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+}
+
+function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key);
+    if (!itemStr) {
+        return null;
+    }
+    const item = JSON.parse(itemStr);
+    const now = new Date();
+    if (now.getTime() > item.expiry) {
+        localStorage.removeItem(key);
+        return null;
+    }
+    return item.value;
+}
+
+BTN_SET.addEventListener('click', () => {
+    setWithExpiry('myKey', 'myValue', 5000);
+})
+
+BTN_GET.addEventListener('click', () => {
+    const value = getWithExpiry('myKey');
+    console.log('===>данные из локал сторадж ',value)
+    })
+
+BRN_DEL.addEventListener('click', () => {
+    localStorage.removeItem('myKey')
+ 
+     })
 
 
