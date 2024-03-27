@@ -7,21 +7,8 @@
 </head>
 <body>
 
-<button id="redirectButton">Перейти на другой хост</button>
+<button id="print_external">Перейти на другой хост</button>
 
-<script>
-// Функция, которая будет вызвана при событии click на кнопке
-function redirectToOtherHost() {
-    // Замените 'https://example.com' на URL вашего целевого хоста
-    window.location.href = '/';
-}
-
-// Получаем кнопку по ее идентификатору
-var redirectButton = document.getElementById('redirectButton');
-
-// Добавляем обработчик события click на кнопке
-redirectButton.addEventListener('click', redirectToOtherHost);
-</script>
-
+<script src="/script.js"></script>
 </body>
 </html>
