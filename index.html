@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Переадресация по событию</title>
+    <title>Document</title>
 </head>
+<script>
+//     const params = {
+//   cam: 17,
+//   // Другие параметры, если необходимо
+// };
+// const queryString = new URLSearchParams(params).toString();
+function openInNewWindow() 
+{
+    const url = "http://127.0.0.1:3000/en/demo-easy.html?stream=1&cam=10"
+    const windowFeatures = 'width=700,height=500,resizable=yes,scrollbars=yes';
+    window.open(url, '_blank', windowFeatures);
+} 
+</script>
 <body>
-
-<button id="print_external">Перейти на другой хост</button>
-
-<div style="height: 300px; width: 300px">
-    <table style="width:100%;height:100%;background-color: white;border: 1px solid black; border-collapse: collapse;"> 
-        <tr style="border: 1px solid black;height: 20%"><td>Контейнер</td></tr>
-        <tr style="border: 1px solid black;height: 80%"><td>Содержимое</td></tr>
-        </table>
-</div>
-<div class="kek" style="width:100px; height:100px; background-color: blue;"></div>
-<script src="/trash.js"></script>
-<script src="/next.js"></script>
+    <h1>Web Scada на https</h1>
+    <iframe id="content-frame" style="width: 100%; height: 500px; border: none; display: none;"></iframe>
+    <a href="#" onclick="openInNewWindow();">Ссылка на видеопоток</a>
 </body>
 </html>
