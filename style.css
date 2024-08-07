@@ -1,16 +1,12 @@
-.parent{
-    width: 500px;
-    height: 500px;
-    background-color: #ffff33;
-    position: relative
+ table{
+    border: 1px solid black;
+    border-collapse: collapse;
 }
 
-.child{
-    width: 250px;
-    height: 250px;
-    background-color: red;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%)
+td{
+    border: 1px solid black;
+}
+
+tr{
+    border: 1px solid black;
 }
