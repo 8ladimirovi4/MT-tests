@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Version="4.9.0.19450">
+<Project Version="4.902.0.17904">
   <Config AutoRun="false" Timeout="0" />
   <Modules>
     <Module Name="База данных" ID="21dc894c-7ab9-4f74-b17a-2b92ec080ada" TimeOffset="03:00:00">
@@ -11,11 +11,11 @@
     <Module Name="Оборудование" ID="178a5fdb-b1b5-46fa-b73b-ed46a92cd63d" TimeOffset="03:00:00">
       <Equipments />
     </Module>
-    <Module Name="Хост-система" ID="af82d2e9-af5e-4ab4-8938-de9204e4ec82" Debug="true" TimeOffset="03:00:00">
-      <HostSystem WD="false" DIO="false" Type="GENERIC" />
-    </Module>
     <Module Name="Отчёты" ID="765939b9-9f51-463b-a25a-30df9697c373" TimeOffset="03:00:00">
       <ReportsSet />
+    </Module>
+    <Module Name="Хост-система" ID="af82d2e9-af5e-4ab4-8938-de9204e4ec82" Debug="true" TimeOffset="03:00:00">
+      <HostSystem WD="false" DIO="false" Type="GENERIC" />
     </Module>
     <Module Name="Мнемосхемы" ID="e1bd03f7-dd87-4e38-8eae-321f9e113ccb" TimeOffset="03:00:00">
       <SchemeSet />
@@ -23,26 +23,26 @@
     <Module Name="Алгоритмы" ID="76192dca-c7bd-47c2-95a9-b865f69306b7" TimeOffset="03:00:00">
       <Algorithms />
     </Module>
+    <Module Name="Виртуальные устройства" ID="efdaf28e-6698-41f1-93f7-85230f7f7a00" TimeOffset="03:00:00">
+      <VirtualDevices />
+    </Module>
     <Module Name="Modbus RTU (ведущий)" ID="0c5679eb-7dc2-4e44-a404-ded13f7a37f9" TimeOffset="03:00:00">
       <ModbusRTUMaster TimeOffset="03:00:00">
         <Channels />
       </ModbusRTUMaster>
-    </Module>
-    <Module Name="Виртуальные устройства" ID="efdaf28e-6698-41f1-93f7-85230f7f7a00" TimeOffset="03:00:00">
-      <VirtualDevices />
     </Module>
     <Module Name="Modbus RTU (ведомый)" ID="9a915cbe-8546-464b-a869-2aec92d52753" TimeOffset="03:00:00">
       <ModbusRTUSlave TimeOffset="03:00:00">
         <Channels />
       </ModbusRTUSlave>
     </Module>
+    <Module Name="Сохраняемые параметры" ID="5db68a8d-d1e9-4052-bcc9-31dc7483191d" TimeOffset="03:00:00">
+      <DatabaseTags />
+    </Module>
     <Module Name="Modbus TCP (клиент)" ID="67b1dcff-0f36-476e-a91f-a02cc4500715" TimeOffset="03:00:00">
       <ModbusTCPClient TimeOffset="03:00:00">
         <Channels />
       </ModbusTCPClient>
-    </Module>
-    <Module Name="Сохраняемые параметры" ID="5db68a8d-d1e9-4052-bcc9-31dc7483191d" TimeOffset="03:00:00">
-      <DatabaseTags />
     </Module>
     <Module Name="Modbus TCP (сервер)" ID="6cac3421-be1c-44e6-923e-33ae3e787e25" TimeOffset="03:00:00">
       <ModbusTCPServer TimeOffset="03:00:00">
@@ -52,11 +52,11 @@
     <Module Name="Скриптовый движок" ID="9ebc2f69-4839-4fe1-955a-6b2dc4901af5" TimeOffset="03:00:00">
       <Scripts />
     </Module>
-    <Module Name="IEC 60870-101 (ведущий)" ID="05146dd2-6749-4d0b-b74e-a68aa1376a68" TimeOffset="03:00:00">
-      <IEC101Master TimeOffset="03:00:00" />
-    </Module>
     <Module Name="Вычисляемые параметры" ID="65170756-31fd-4235-bb9c-3eff27522307" TimeOffset="03:00:00">
       <CalculatedTags />
+    </Module>
+    <Module Name="IEC 60870-101 (ведущий)" ID="05146dd2-6749-4d0b-b74e-a68aa1376a68" TimeOffset="03:00:00">
+      <IEC101Master TimeOffset="03:00:00" />
     </Module>
     <Module Name="Бланки переключений" ID="7b98e71e-ccfe-412e-bfeb-4fab0dbf21af" TimeOffset="03:00:00">
       <OTOForms TimeOffset="03:00:00" />
@@ -88,11 +88,11 @@
     <Module Name="Видеонаблюдение" ID="346d7924-56df-4daf-af77-06e28d43ec03" TimeOffset="03:00:00">
       <VideoSurveillance />
     </Module>
-    <Module Name="IEC 60870-104 (клиент)" ID="7f88b4b5-91dd-46e4-b443-99898902ef09" TimeOffset="03:00:00">
-      <IEC104Client TimeOffset="03:00:00" />
-    </Module>
     <Module Name="Автоотчёты" ID="facc9e8d-ed18-4031-95b4-781782275efa" TimeOffset="03:00:00">
       <AutoReportsSet />
+    </Module>
+    <Module Name="IEC 60870-104 (клиент)" ID="7f88b4b5-91dd-46e4-b443-99898902ef09" TimeOffset="03:00:00">
+      <IEC104Client TimeOffset="03:00:00" />
     </Module>
     <Module Name="Передача файлов (FTP)" ID="e24f6d92-5f94-4840-82af-2b4698761029" TimeOffset="03:00:00">
       <FTPProvider ID="e24f6d92-5f94-4840-82af-2b4698761029" TimeOffset="03:00:00">
@@ -112,9 +112,6 @@
     </Module>
     <Module Name="OPC UA (клиент)" ID="ebcf18bb-00d9-42cb-8a83-36a658aa5ca8" TimeOffset="03:00:00">
       <OPCClient TimeOffset="03:00:00" />
-    </Module>
-    <Module Name="OPC UA (сервер)" ID="db6adeec-2437-44d1-9e60-f4c063594e4f" TimeOffset="03:00:00">
-      <OPCServer TimeOffset="03:00:00" />
     </Module>
     <Module Name="S7 (клиент)" ID="d6846be8-fbaf-4e05-8afc-83a69541b710" TimeOffset="03:00:00">
       <S7Client TimeOffset="03:00:00" />
@@ -160,7 +157,7 @@
     </Module>
     <Module Name="Резервирование" ID="913b86c9-c549-430e-bbb4-843ba645783f" Debug="true" AutoStart="true" TimeOffset="03:00:00">
       <Reservation>
-        <Options IP="192.168.90.164" Port="5000" IsMaster="true" ConnectionTimeout="10" PingAttempts="4" />
+        <Options IP="192.168.90.143" Port="5000" IsMaster="false" ConnectionTimeout="10" />
       </Reservation>
     </Module>
   </Modules>
