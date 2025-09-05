@@ -19,7 +19,10 @@
 <body>
 <!-- Кнопка загрузки данных -->
 <div class="load-section">
-    <button id="load-tree-btn" class="load-btn">Загрузить дерево с сервера</button>
+    <button id="load-tree-btn" class="load-btn">
+        <span id="btn-text">Загрузить дерево с сервера в svg</span>
+        <span id="timer-display" class="timer-display" style="display: none;">0.00с</span>
+    </button>
     <div id="loading-indicator" class="loading-indicator" style="display: none;">
         Загрузка данных...
     </div>
@@ -72,6 +75,69 @@ function updateTreeStats() {
     `;
 }
 
+// Переменные для таймера
+let timerInterval = null;
+let startTime = 0;
+let isTimerRunning = false;
+
+// Функция для запуска таймера
+function startTimer() {
+    if (isTimerRunning) return;
+    
+    startTime = Date.now();
+    isTimerRunning = true;
+    
+    const timerDisplay = document.getElementById('timer-display');
+    const btnText = document.getElementById('btn-text');
+    
+    // Показываем таймер и скрываем текст кнопки
+    timerDisplay.style.display = 'inline-block';
+    btnText.style.display = 'none';
+    
+    // Обновляем таймер каждые 10мс для точности
+    timerInterval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timerDisplay.textContent = elapsed.toFixed(2) + 'с';
+    }, 10);
+}
+
+// Функция для остановки таймера
+function stopTimer() {
+    if (!isTimerRunning) return;
+    
+    isTimerRunning = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    
+    const timerDisplay = document.getElementById('timer-display');
+    const btnText = document.getElementById('btn-text');
+    
+    // Фиксируем финальное время
+    const finalTime = (Date.now() - startTime) / 1000;
+    timerDisplay.textContent = finalTime.toFixed(2) + 'с';
+    
+    // Показываем текст кнопки и таймер
+    btnText.style.display = 'inline-block';
+    timerDisplay.style.display = 'inline-block';
+}
+
+// Функция для сброса таймера
+function resetTimer() {
+    if (isTimerRunning) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isTimerRunning = false;
+    }
+    
+    const timerDisplay = document.getElementById('timer-display');
+    const btnText = document.getElementById('btn-text');
+    
+    // Скрываем таймер и показываем текст кнопки
+    timerDisplay.style.display = 'none';
+    btnText.style.display = 'inline-block';
+    timerDisplay.textContent = '0.00с';
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     const loadBtn = document.getElementById('load-tree-btn');
@@ -80,6 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчик клика по кнопке загрузки
     loadBtn.addEventListener('click', async function() {
         try {
+            // Сбрасываем таймер при новом нажатии
+            resetTimer();
+            
+            // Запускаем таймер
+            startTimer();
+            
             // Показываем индикатор загрузки
             loadBtn.disabled = true;
             loadingIndicator.style.display = 'block';
@@ -94,8 +166,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Рендерим дерево
                 window.TreeData.renderTree();
                 
-                // Скрываем кнопку после успешной загрузки
-                loadBtn.style.display = 'none';
+                // Останавливаем таймер после отображения контента
+                stopTimer();
+                
+                // Скрываем индикатор загрузки, но оставляем кнопку видимой
                 loadingIndicator.style.display = 'none';
             } else {
                 throw new Error('Не удалось загрузить данные с сервера');
@@ -104,9 +178,15 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Ошибка при загрузке данных:', error);
             alert('Ошибка при загрузке данных: ' + error.message);
             
+            // Останавливаем таймер при ошибке
+            stopTimer();
+            
             // Восстанавливаем кнопку
             loadBtn.disabled = false;
             loadingIndicator.style.display = 'none';
+        } finally {
+            // Восстанавливаем кнопку
+            loadBtn.disabled = false;
         }
     });
 });
