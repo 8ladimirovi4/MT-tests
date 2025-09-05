@@ -1,0 +1,40 @@
+<!-- Древовидный компонент -->
+<div class="tree-container" id="tree-container">
+    <div class="tree-header">
+        Древовидная структура (1000 элементов)
+    </div>
+    <div class="tree-stats" id="tree-stats">
+        Загрузка...
+    </div>
+</div>
+
+<script>
+// Функция для обновления статистики
+function updateTreeStats() {
+    const statsElement = document.getElementById('tree-stats');
+    if (!statsElement) return;
+    
+    const systemPackCount = 500;
+    const bmrzCount = 500;
+    const totalCount = systemPackCount + bmrzCount;
+    
+    statsElement.innerHTML = `
+        System Pack: ${systemPackCount} элементов | 
+        BMRZ: ${bmrzCount} элементов | 
+        Всего: ${totalCount} элементов
+    `;
+}
+
+// Инициализация дерева при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновляем статистику
+    updateTreeStats();
+    
+    // Рендерим дерево
+    if (window.TreeData && window.TreeData.renderTree) {
+        window.TreeData.renderTree();
+    } else {
+        console.error('TreeData не загружен');
+    }
+});
+</script>

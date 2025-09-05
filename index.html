@@ -9,31 +9,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jexcel/1.5.7/css/jquery.jexcel.css" type="text/css" />
     
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./components/tree/tree-styles.css">
     <title>Document</title>
+    <script src="./components/tree/tree-data.js" defer></script>
     <script src="./index.js" defer></script>
 </head>
 
 <body>
-   <h1>KEK</h1>
-   <!-- <p>Paste excel data here:</p>  
-   <textarea id="excel_data" name="excel_data" style="width:250px;height:150px;"></textarea><br>
-   <br><br>
-       <p>Table data will appear below</p>
-   <hr>
-   <div id="excel_table"></div> -->
+<!-- Древовидный компонент -->
+<div class="tree-container" id="tree-container">
+    <div class="tree-header">
+        Древовидная структура (200 элементов)
+    </div>
+    <div class="tree-stats" id="tree-stats">
+        Загрузка...
+    </div>
+</div>
 
-  
+<script>
+// Функция для обновления статистики
+function updateTreeStats() {
+    const statsElement = document.getElementById('tree-stats');
+    if (!statsElement) return;
+    
+    const systemPackCount = 100;
+    const bmrzCount = 100;
+    const totalCount = systemPackCount + bmrzCount;
+    
+    statsElement.innerHTML = `
+        System Pack: ${systemPackCount} элементов | 
+        BMRZ: ${bmrzCount} элементов | 
+        Всего: ${totalCount} элементов
+    `;
+}
 
-<p>Paste excel data here:</p>
-<textarea id="pastein" name="excel_data" style="width:250px;height:150px;"></textarea><br>
-<button onclick=generateTable()>Get data</button>
-<!-- <input type="button" onclick="javascript:generateTable()" value="Genereate Table"/> -->
-<br><br>
-<p>Table data will appear below</p>
-<hr>
-<div id="excel_table"></div>
-
-<div id="mytable"></div>
-<table><tr><td>1</td><td>Иван</td><td>Иванов</td><td>Пупкин</td></tr><tr><td>2</td><td>Иван</td><td>Пупкин</td></tr><tr><td>3</td><td>Иванов</td><td>Пупкин</td><td></td></tr><tr><td>4</td><td>Иван</td><td>Иванов</td><td>Пупкин</td></tr><tr><td>5</td><td>Иван</td><td>Иванов</td><td>Пупкин</td></tr></table>
+// Инициализация дерева при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновляем статистику
+    updateTreeStats();
+    
+    // Рендерим дерево
+    if (window.TreeData && window.TreeData.renderTree) {
+        window.TreeData.renderTree();
+    } else {
+        console.error('TreeData не загружен');
+    }
+});
+</script>
 </body>
 </html>
