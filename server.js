@@ -5,8 +5,8 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// Общая переменная для количества элементов в дереве
-const TREE_ITEMS_COUNT = 2000;
+// Общая переменная для количества элементов в дереве (по умолчанию)
+const DEFAULT_TREE_ITEMS_COUNT = 10;
 
 // Middleware
 app.use(cors());
@@ -14,16 +14,16 @@ app.use(express.json());
 app.use(express.static('.')); // Раздаем статические файлы
 
 // Генерируем данные для system_pack
-function generateSystemPackData() {
+function generateSystemPackData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
     const systemPackData = [];
     
-    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+    for (let i = 1; i <= itemsCount; i++) {
         systemPackData.push({
             id: `system_pack_${i}`,
             name: `system_pack_${i}`,
             type: 'system_pack',
             icon: 'SystemPact.svg',
-            children: i < TREE_ITEMS_COUNT ? [`system_pack_${i + 1}`] : []
+            children: i < itemsCount ? [`system_pack_${i + 1}`] : []
         });
     }
     
@@ -31,16 +31,16 @@ function generateSystemPackData() {
 }
 
 // Генерируем данные для bmrz
-function generateBmrzData() {
+function generateBmrzData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
     const bmrzData = [];
     
-    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+    for (let i = 1; i <= itemsCount; i++) {
         bmrzData.push({
             id: `bmrz_${i}`,
             name: `bmrz_${i}`,
             type: 'bmrz',
             icon: 'BMRZ.svg',
-            children: i < TREE_ITEMS_COUNT ? [`bmrz_${i + 1}`] : []
+            children: i < itemsCount ? [`bmrz_${i + 1}`] : []
         });
     }
     
@@ -48,16 +48,16 @@ function generateBmrzData() {
 }
 
 // Генерируем PNG данные для system_pack
-function generatePngSystemPackData() {
+function generatePngSystemPackData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
     const systemPackData = [];
     
-    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+    for (let i = 1; i <= itemsCount; i++) {
         systemPackData.push({
             id: `png_system_pack_${i}`,
             name: `system_pack_${i}`,
             type: 'system_pack',
             icon: 'systemPact.png',
-            children: i < TREE_ITEMS_COUNT ? [`png_system_pack_${i + 1}`] : []
+            children: i < itemsCount ? [`png_system_pack_${i + 1}`] : []
         });
     }
     
@@ -65,16 +65,16 @@ function generatePngSystemPackData() {
 }
 
 // Генерируем PNG данные для bmrz
-function generatePngBmrzData() {
+function generatePngBmrzData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
     const bmrzData = [];
     
-    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+    for (let i = 1; i <= itemsCount; i++) {
         bmrzData.push({
             id: `png_bmrz_${i}`,
             name: `bmrz_${i}`,
             type: 'bmrz',
             icon: 'bmrz.png',
-            children: i < TREE_ITEMS_COUNT ? [`png_bmrz_${i + 1}`] : []
+            children: i < itemsCount ? [`png_bmrz_${i + 1}`] : []
         });
     }
     
@@ -82,9 +82,9 @@ function generatePngBmrzData() {
 }
 
 // Создаем полную структуру дерева
-function createTreeData() {
-    const systemPackData = generateSystemPackData();
-    const bmrzData = generateBmrzData();
+function createTreeData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
+    const systemPackData = generateSystemPackData(itemsCount);
+    const bmrzData = generateBmrzData(itemsCount);
     
     // Создаем корневые элементы
     const treeData = [
@@ -119,9 +119,9 @@ function createTreeData() {
 }
 
 // Создаем полную структуру PNG дерева
-function createPngTreeData() {
-    const systemPackData = generatePngSystemPackData();
-    const bmrzData = generatePngBmrzData();
+function createPngTreeData(itemsCount = DEFAULT_TREE_ITEMS_COUNT) {
+    const systemPackData = generatePngSystemPackData(itemsCount);
+    const bmrzData = generatePngBmrzData(itemsCount);
     
     // Создаем корневые элементы
     const treeData = [
@@ -158,7 +158,18 @@ function createPngTreeData() {
 // API эндпоинт для получения данных дерева
 app.get('/api/tree-data', (req, res) => {
     try {
-        const { treeData, dataMap } = createTreeData();
+        // Получаем количество элементов из query параметра
+        const itemsCount = parseInt(req.query.count) || DEFAULT_TREE_ITEMS_COUNT;
+        
+        // Валидация
+        if (itemsCount < 1 || itemsCount > 10000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Количество элементов должно быть от 1 до 10000'
+            });
+        }
+        
+        const { treeData, dataMap } = createTreeData(itemsCount);
         
         // Преобразуем Map в обычный объект для JSON сериализации
         const dataMapObject = {};
@@ -186,7 +197,8 @@ app.get('/api/tree-data', (req, res) => {
 app.get('/api/tree-children/:parentId', (req, res) => {
     try {
         const { parentId } = req.params;
-        const { dataMap } = createTreeData();
+        const itemsCount = parseInt(req.query.count) || DEFAULT_TREE_ITEMS_COUNT;
+        const { dataMap } = createTreeData(itemsCount);
         
         const parent = dataMap.get(parentId);
         if (!parent || !parent.children) {
@@ -214,7 +226,18 @@ app.get('/api/tree-children/:parentId', (req, res) => {
 // API эндпоинт для получения PNG данных дерева
 app.get('/api/png-tree-data', (req, res) => {
     try {
-        const { treeData, dataMap } = createPngTreeData();
+        // Получаем количество элементов из query параметра
+        const itemsCount = parseInt(req.query.count) || DEFAULT_TREE_ITEMS_COUNT;
+        
+        // Валидация
+        if (itemsCount < 1 || itemsCount > 10000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Количество элементов должно быть от 1 до 10000'
+            });
+        }
+        
+        const { treeData, dataMap } = createPngTreeData(itemsCount);
         
         // Преобразуем Map в обычный объект для JSON сериализации
         const dataMapObject = {};
@@ -242,7 +265,8 @@ app.get('/api/png-tree-data', (req, res) => {
 app.get('/api/png-tree-children/:parentId', (req, res) => {
     try {
         const { parentId } = req.params;
-        const { dataMap } = createPngTreeData();
+        const itemsCount = parseInt(req.query.count) || DEFAULT_TREE_ITEMS_COUNT;
+        const { dataMap } = createPngTreeData(itemsCount);
         
         const parent = dataMap.get(parentId);
         if (!parent || !parent.children) {

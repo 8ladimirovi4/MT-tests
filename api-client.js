@@ -9,11 +9,12 @@ class TreeApiClient {
 
     /**
      * Загружает данные дерева с сервера
+     * @param {number} itemsCount - Количество элементов дерева
      * @returns {Promise<Object>} Данные дерева
      */
-    async loadTreeData() {
+    async loadTreeData(itemsCount = 2000) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/tree-data`);
+            const response = await fetch(`${this.baseUrl}/api/tree-data?count=${itemsCount}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -35,11 +36,12 @@ class TreeApiClient {
     /**
      * Загружает дочерние элементы для указанного родителя
      * @param {string} parentId - ID родительского элемента
+     * @param {number} itemsCount - Количество элементов дерева
      * @returns {Promise<Array>} Массив дочерних элементов
      */
-    async loadChildren(parentId) {
+    async loadChildren(parentId, itemsCount = 2000) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/tree-children/${parentId}`);
+            const response = await fetch(`${this.baseUrl}/api/tree-children/${parentId}?count=${itemsCount}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,11 +62,12 @@ class TreeApiClient {
 
     /**
      * Загружает PNG данные дерева с сервера
+     * @param {number} itemsCount - Количество элементов дерева
      * @returns {Promise<Object>} PNG данные дерева
      */
-    async loadPngTreeData() {
+    async loadPngTreeData(itemsCount = 2000) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/png-tree-data`);
+            const response = await fetch(`${this.baseUrl}/api/png-tree-data?count=${itemsCount}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -86,11 +89,12 @@ class TreeApiClient {
     /**
      * Загружает дочерние PNG элементы для указанного родителя
      * @param {string} parentId - ID родительского элемента
+     * @param {number} itemsCount - Количество элементов дерева
      * @returns {Promise<Array>} Массив дочерних PNG элементов
      */
-    async loadPngChildren(parentId) {
+    async loadPngChildren(parentId, itemsCount = 2000) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/png-tree-children/${parentId}`);
+            const response = await fetch(`${this.baseUrl}/api/png-tree-children/${parentId}?count=${itemsCount}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

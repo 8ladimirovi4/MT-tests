@@ -18,6 +18,35 @@ tr{
     padding: 20px;
 }
 
+.input-group {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.input-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.tree-count-input {
+    padding: 8px 12px;
+    border: 2px solid #2196f3;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 120px;
+    text-align: center;
+}
+
+.tree-count-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+}
+
 .button-group {
     display: flex;
     gap: 20px;

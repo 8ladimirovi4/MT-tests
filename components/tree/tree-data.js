@@ -8,13 +8,13 @@ let treeData = [];
 let dataMap = new Map();
 
 // Функция для инициализации данных с сервера
-async function initializeTreeData() {
+async function initializeTreeData(itemsCount = 2000) {
     try {
         if (!window.treeApiClient) {
             throw new Error('API клиент не загружен');
         }
         
-        const serverData = await window.treeApiClient.loadTreeData();
+        const serverData = await window.treeApiClient.loadTreeData(itemsCount);
         
         // Обновляем глобальные переменные
         treeData = serverData.treeData;

@@ -8,13 +8,13 @@ let pngTreeData = [];
 let pngDataMap = new Map();
 
 // Функция для инициализации PNG данных с сервера
-async function initializePngTreeData() {
+async function initializePngTreeData(itemsCount = 2000) {
     try {
         if (!window.treeApiClient) {
             throw new Error('API клиент не загружен');
         }
         
-        const serverData = await window.treeApiClient.loadPngTreeData();
+        const serverData = await window.treeApiClient.loadPngTreeData(itemsCount);
         
         // Обновляем глобальные переменные
         pngTreeData = serverData.treeData;
