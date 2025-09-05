@@ -13,33 +13,56 @@
     <title>Document</title>
     <script src="./api-client.js" defer></script>
     <script src="./components/tree/tree-data.js" defer></script>
+    <script src="./components/tree/png-tree-data.js" defer></script>
     <script src="./index.js" defer></script>
 </head>
 
 <body>
-<!-- Кнопка загрузки данных -->
+<!-- Кнопки загрузки данных -->
 <div class="load-section">
-    <button id="load-tree-btn" class="load-btn">
-        <span id="btn-text">Загрузить дерево с сервера в svg</span>
-        <span id="timer-display" class="timer-display" style="display: none;">0.00с</span>
-    </button>
+    <div class="button-group">
+        <button id="load-tree-btn" class="load-btn">
+            <span id="btn-text">Загрузить дерево с сервера в svg</span>
+            <span id="timer-display" class="timer-display" style="display: none;">0.00с</span>
+        </button>
+        <button id="load-png-tree-btn" class="load-btn">
+            <span id="png-btn-text">Загрузить дерево с сервера в png</span>
+            <span id="png-timer-display" class="timer-display" style="display: none;">0.00с</span>
+        </button>
+    </div>
     <div id="loading-indicator" class="loading-indicator" style="display: none;">
         Загрузка данных...
     </div>
+    <div id="png-loading-indicator" class="loading-indicator" style="display: none;">
+        Загрузка PNG данных...
+    </div>
 </div>
 
-<!-- Древовидный компонент -->
-<div class="tree-container" id="tree-container" style="display: none;">
-    <div class="tree-header" id="tree-header">
-        Древовидная структура (нажмите кнопку для загрузки)
+<!-- Контейнер для двух деревьев -->
+<div class="trees-wrapper">
+    <!-- SVG Древовидный компонент -->
+    <div class="tree-container" id="tree-container" style="display: none;">
+        <div class="tree-header" id="tree-header">
+            Древовидная структура SVG (нажмите кнопку для загрузки)
+        </div>
+        <div class="tree-stats" id="tree-stats">
+            Загрузка...
+        </div>
     </div>
-    <div class="tree-stats" id="tree-stats">
-        Загрузка...
+
+    <!-- PNG Древовидный компонент -->
+    <div class="tree-container" id="png-tree-container" style="display: none;">
+        <div class="tree-header" id="png-tree-header">
+            Древовидная структура PNG (нажмите кнопку для загрузки)
+        </div>
+        <div class="tree-stats" id="png-tree-stats">
+            Загрузка...
+        </div>
     </div>
 </div>
 
 <script>
-// Функция для обновления статистики
+// Функция для обновления статистики SVG дерева
 function updateTreeStats() {
     const statsElement = document.getElementById('tree-stats');
     const headerElement = document.getElementById('tree-header');
@@ -65,7 +88,7 @@ function updateTreeStats() {
     const totalCount = systemPackCount + bmrzCount;
     
     // Обновляем заголовок
-    headerElement.textContent = `Древовидная структура (${totalCount} элементов)`;
+    headerElement.textContent = `Древовидная структура SVG (${totalCount} элементов)`;
     
     // Обновляем статистику
     statsElement.innerHTML = `
@@ -75,10 +98,51 @@ function updateTreeStats() {
     `;
 }
 
-// Переменные для таймера
+// Функция для обновления статистики PNG дерева
+function updatePngTreeStats() {
+    const statsElement = document.getElementById('png-tree-stats');
+    const headerElement = document.getElementById('png-tree-header');
+    
+    if (!statsElement || !headerElement) return;
+    
+    // Получаем данные из PngTreeData
+    const treeData = window.PngTreeData.treeData();
+    const dataMap = window.PngTreeData.dataMap();
+    
+    let systemPackCount = 0;
+    let bmrzCount = 0;
+    
+    // Подсчитываем элементы по типам
+    dataMap.forEach(item => {
+        if (item.type === 'system_pack') {
+            systemPackCount++;
+        } else if (item.type === 'bmrz') {
+            bmrzCount++;
+        }
+    });
+    
+    const totalCount = systemPackCount + bmrzCount;
+    
+    // Обновляем заголовок
+    headerElement.textContent = `Древовидная структура PNG (${totalCount} элементов)`;
+    
+    // Обновляем статистику
+    statsElement.innerHTML = `
+        System Pack: ${systemPackCount} элементов | 
+        BMRZ: ${bmrzCount} элементов | 
+        Всего: ${totalCount} элементов
+    `;
+}
+
+// Переменные для SVG таймера
 let timerInterval = null;
 let startTime = 0;
 let isTimerRunning = false;
+
+// Переменные для PNG таймера
+let pngTimerInterval = null;
+let pngStartTime = 0;
+let isPngTimerRunning = false;
 
 // Функция для запуска таймера
 function startTimer() {
@@ -138,12 +202,72 @@ function resetTimer() {
     timerDisplay.textContent = '0.00с';
 }
 
+// Функция для запуска PNG таймера
+function startPngTimer() {
+    if (isPngTimerRunning) return;
+    
+    pngStartTime = Date.now();
+    isPngTimerRunning = true;
+    
+    const timerDisplay = document.getElementById('png-timer-display');
+    const btnText = document.getElementById('png-btn-text');
+    
+    // Показываем таймер и скрываем текст кнопки
+    timerDisplay.style.display = 'inline-block';
+    btnText.style.display = 'none';
+    
+    // Обновляем таймер каждые 10мс для точности
+    pngTimerInterval = setInterval(() => {
+        const elapsed = (Date.now() - pngStartTime) / 1000;
+        timerDisplay.textContent = elapsed.toFixed(2) + 'с';
+    }, 10);
+}
+
+// Функция для остановки PNG таймера
+function stopPngTimer() {
+    if (!isPngTimerRunning) return;
+    
+    isPngTimerRunning = false;
+    clearInterval(pngTimerInterval);
+    pngTimerInterval = null;
+    
+    const timerDisplay = document.getElementById('png-timer-display');
+    const btnText = document.getElementById('png-btn-text');
+    
+    // Фиксируем финальное время
+    const finalTime = (Date.now() - pngStartTime) / 1000;
+    timerDisplay.textContent = finalTime.toFixed(2) + 'с';
+    
+    // Показываем текст кнопки и таймер
+    btnText.style.display = 'inline-block';
+    timerDisplay.style.display = 'inline-block';
+}
+
+// Функция для сброса PNG таймера
+function resetPngTimer() {
+    if (isPngTimerRunning) {
+        clearInterval(pngTimerInterval);
+        pngTimerInterval = null;
+        isPngTimerRunning = false;
+    }
+    
+    const timerDisplay = document.getElementById('png-timer-display');
+    const btnText = document.getElementById('png-btn-text');
+    
+    // Скрываем таймер и показываем текст кнопки
+    timerDisplay.style.display = 'none';
+    btnText.style.display = 'inline-block';
+    timerDisplay.textContent = '0.00с';
+}
+
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     const loadBtn = document.getElementById('load-tree-btn');
+    const pngLoadBtn = document.getElementById('load-png-tree-btn');
     const loadingIndicator = document.getElementById('loading-indicator');
+    const pngLoadingIndicator = document.getElementById('png-loading-indicator');
     
-    // Обработчик клика по кнопке загрузки
+    // Обработчик клика по кнопке загрузки SVG
     loadBtn.addEventListener('click', async function() {
         try {
             // Сбрасываем таймер при новом нажатии
@@ -187,6 +311,53 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             // Восстанавливаем кнопку
             loadBtn.disabled = false;
+        }
+    });
+
+    // Обработчик клика по кнопке загрузки PNG
+    pngLoadBtn.addEventListener('click', async function() {
+        try {
+            // Сбрасываем таймер при новом нажатии
+            resetPngTimer();
+            
+            // Запускаем таймер
+            startPngTimer();
+            
+            // Показываем индикатор загрузки
+            pngLoadBtn.disabled = true;
+            pngLoadingIndicator.style.display = 'block';
+            
+            // Инициализируем данные с сервера
+            const success = await window.PngTreeData.initializeTreeData();
+            
+            if (success) {
+                // Обновляем статистику
+                updatePngTreeStats();
+                
+                // Рендерим дерево
+                window.PngTreeData.renderTree();
+                
+                // Останавливаем таймер после отображения контента
+                stopPngTimer();
+                
+                // Скрываем индикатор загрузки, но оставляем кнопку видимой
+                pngLoadingIndicator.style.display = 'none';
+            } else {
+                throw new Error('Не удалось загрузить PNG данные с сервера');
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке PNG данных:', error);
+            alert('Ошибка при загрузке PNG данных: ' + error.message);
+            
+            // Останавливаем таймер при ошибке
+            stopPngTimer();
+            
+            // Восстанавливаем кнопку
+            pngLoadBtn.disabled = false;
+            pngLoadingIndicator.style.display = 'none';
+        } finally {
+            // Восстанавливаем кнопку
+            pngLoadBtn.disabled = false;
         }
     });
 });

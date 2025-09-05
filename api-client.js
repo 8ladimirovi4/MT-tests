@@ -57,6 +57,57 @@ class TreeApiClient {
             throw error;
         }
     }
+
+    /**
+     * Загружает PNG данные дерева с сервера
+     * @returns {Promise<Object>} PNG данные дерева
+     */
+    async loadPngTreeData() {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/png-tree-data`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Ошибка при загрузке PNG данных');
+            }
+            
+            return result.data;
+        } catch (error) {
+            console.error('Ошибка при загрузке PNG данных дерева:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Загружает дочерние PNG элементы для указанного родителя
+     * @param {string} parentId - ID родительского элемента
+     * @returns {Promise<Array>} Массив дочерних PNG элементов
+     */
+    async loadPngChildren(parentId) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/png-tree-children/${parentId}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Ошибка при загрузке дочерних PNG элементов');
+            }
+            
+            return result.data;
+        } catch (error) {
+            console.error('Ошибка при загрузке дочерних PNG элементов:', error);
+            throw error;
+        }
+    }
 }
 
 // Создаем глобальный экземпляр API клиента

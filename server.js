@@ -47,6 +47,40 @@ function generateBmrzData() {
     return bmrzData;
 }
 
+// Генерируем PNG данные для system_pack
+function generatePngSystemPackData() {
+    const systemPackData = [];
+    
+    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+        systemPackData.push({
+            id: `png_system_pack_${i}`,
+            name: `system_pack_${i}`,
+            type: 'system_pack',
+            icon: 'systemPact.png',
+            children: i < TREE_ITEMS_COUNT ? [`png_system_pack_${i + 1}`] : []
+        });
+    }
+    
+    return systemPackData;
+}
+
+// Генерируем PNG данные для bmrz
+function generatePngBmrzData() {
+    const bmrzData = [];
+    
+    for (let i = 1; i <= TREE_ITEMS_COUNT; i++) {
+        bmrzData.push({
+            id: `png_bmrz_${i}`,
+            name: `bmrz_${i}`,
+            type: 'bmrz',
+            icon: 'bmrz.png',
+            children: i < TREE_ITEMS_COUNT ? [`png_bmrz_${i + 1}`] : []
+        });
+    }
+    
+    return bmrzData;
+}
+
 // Создаем полную структуру дерева
 function createTreeData() {
     const systemPackData = generateSystemPackData();
@@ -68,6 +102,43 @@ function createTreeData() {
             type: 'bmrz',
             icon: 'BMRZ.svg',
             children: ['bmrz_1'],
+            isRoot: true
+        }
+    ];
+    
+    // Объединяем все данные
+    const allData = [...treeData, ...systemPackData, ...bmrzData];
+    
+    // Создаем карту для быстрого поиска
+    const dataMap = new Map();
+    allData.forEach(item => {
+        dataMap.set(item.id, item);
+    });
+    
+    return { treeData, dataMap };
+}
+
+// Создаем полную структуру PNG дерева
+function createPngTreeData() {
+    const systemPackData = generatePngSystemPackData();
+    const bmrzData = generatePngBmrzData();
+    
+    // Создаем корневые элементы
+    const treeData = [
+        {
+            id: 'png_system_pack_root',
+            name: 'System Pack',
+            type: 'system_pack',
+            icon: 'systemPact.png',
+            children: ['png_system_pack_1'],
+            isRoot: true
+        },
+        {
+            id: 'png_bmrz_root',
+            name: 'BMRZ',
+            type: 'bmrz',
+            icon: 'bmrz.png',
+            children: ['png_bmrz_1'],
             isRoot: true
         }
     ];
@@ -140,10 +211,68 @@ app.get('/api/tree-children/:parentId', (req, res) => {
     }
 });
 
+// API эндпоинт для получения PNG данных дерева
+app.get('/api/png-tree-data', (req, res) => {
+    try {
+        const { treeData, dataMap } = createPngTreeData();
+        
+        // Преобразуем Map в обычный объект для JSON сериализации
+        const dataMapObject = {};
+        dataMap.forEach((value, key) => {
+            dataMapObject[key] = value;
+        });
+        
+        res.json({
+            success: true,
+            data: {
+                treeData,
+                dataMap: dataMapObject
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка при генерации PNG данных дерева:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при генерации PNG данных дерева'
+        });
+    }
+});
+
+// API эндпоинт для получения дочерних PNG элементов
+app.get('/api/png-tree-children/:parentId', (req, res) => {
+    try {
+        const { parentId } = req.params;
+        const { dataMap } = createPngTreeData();
+        
+        const parent = dataMap.get(parentId);
+        if (!parent || !parent.children) {
+            return res.json({
+                success: true,
+                data: []
+            });
+        }
+        
+        const children = parent.children.map(childId => dataMap.get(childId)).filter(Boolean);
+        
+        res.json({
+            success: true,
+            data: children
+        });
+    } catch (error) {
+        console.error('Ошибка при получении дочерних PNG элементов:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при получении дочерних PNG элементов'
+        });
+    }
+});
+
 // Запуск сервера
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);
     console.log(`API эндпоинты:`);
-    console.log(`  GET /api/tree-data - получить все данные дерева`);
-    console.log(`  GET /api/tree-children/:parentId - получить дочерние элементы`);
+    console.log(`  GET /api/tree-data - получить все данные дерева SVG`);
+    console.log(`  GET /api/tree-children/:parentId - получить дочерние элементы SVG`);
+    console.log(`  GET /api/png-tree-data - получить все данные дерева PNG`);
+    console.log(`  GET /api/png-tree-children/:parentId - получить дочерние элементы PNG`);
 });
