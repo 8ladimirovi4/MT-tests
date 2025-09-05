@@ -10,3 +10,37 @@ td{
 tr{
     border: 1px solid black;
 }
+
+/* Стили для секции загрузки */
+.load-section {
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+}
+
+.load-btn {
+    background-color: #2196f3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+.load-btn:hover {
+    background-color: #1976d2;
+}
+
+.load-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.loading-indicator {
+    margin-top: 10px;
+    color: #666;
+    font-style: italic;
+}

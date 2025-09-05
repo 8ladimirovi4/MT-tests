@@ -1,82 +1,36 @@
 /**
- * Mock данные для древовидной структуры
- * 500 элементов system_pack + 500 элементов bmrz
- * Каждый следующий элемент вложен в предыдущий
+ * Клиентский код для работы с древовидной структурой
+ * Данные загружаются с сервера через API
  */
 
-// Генерируем данные для system_pack (1-500)
-function generateSystemPackData() {
-    const systemPackData = [];
-    
-    for (let i = 1; i <= 100; i++) {
-        systemPackData.push({
-            id: `system_pack_${i}`,
-            name: `system_pack_${i}`,
-            type: 'system_pack',
-            icon: 'SystemPact.svg',
-            children: i < 500 ? [`system_pack_${i + 1}`] : []
-        });
-    }
-    
-    return systemPackData;
-}
+// Глобальные переменные для хранения данных
+let treeData = [];
+let dataMap = new Map();
 
-// Генерируем данные для bmrz (1-500)
-function generateBmrzData() {
-    const bmrzData = [];
-    
-    for (let i = 1; i <= 100; i++) {
-        bmrzData.push({
-            id: `bmrz_${i}`,
-            name: `bmrz_${i}`,
-            type: 'bmrz',
-            icon: 'BMRZ.svg',
-            children: i < 500 ? [`bmrz_${i + 1}`] : []
-        });
-    }
-    
-    return bmrzData;
-}
-
-// Создаем полную структуру дерева
-function createTreeData() {
-    const systemPackData = generateSystemPackData();
-    const bmrzData = generateBmrzData();
-    
-    // Создаем корневые элементы
-    const treeData = [
-        {
-            id: 'system_pack_root',
-            name: 'System Pack',
-            type: 'system_pack',
-            icon: 'SystemPact.svg',
-            children: ['system_pack_1'],
-            isRoot: true
-        },
-        {
-            id: 'bmrz_root',
-            name: 'BMRZ',
-            type: 'bmrz',
-            icon: 'BMRZ.svg',
-            children: ['bmrz_1'],
-            isRoot: true
+// Функция для инициализации данных с сервера
+async function initializeTreeData() {
+    try {
+        if (!window.treeApiClient) {
+            throw new Error('API клиент не загружен');
         }
-    ];
-    
-    // Объединяем все данные
-    const allData = [...treeData, ...systemPackData, ...bmrzData];
-    
-    // Создаем карту для быстрого поиска
-    const dataMap = new Map();
-    allData.forEach(item => {
-        dataMap.set(item.id, item);
-    });
-    
-    return { treeData, dataMap };
+        
+        const serverData = await window.treeApiClient.loadTreeData();
+        
+        // Обновляем глобальные переменные
+        treeData = serverData.treeData;
+        
+        // Преобразуем объект обратно в Map
+        dataMap = new Map();
+        Object.entries(serverData.dataMap).forEach(([key, value]) => {
+            dataMap.set(key, value);
+        });
+        
+        return true;
+    } catch (error) {
+        console.error('Ошибка при инициализации данных:', error);
+        return false;
+    }
 }
-
-// Экспортируем данные
-const { treeData, dataMap } = createTreeData();
 
 // Функция для получения дочерних элементов
 function getChildren(parentId) {
@@ -91,6 +45,8 @@ function renderTree() {
     const container = document.getElementById('tree-container');
     if (!container) return;
     
+    // Показываем контейнер
+    container.style.display = 'block';
     container.innerHTML = '';
     
     treeData.forEach(rootItem => {
@@ -149,9 +105,10 @@ function createTreeNode(item, level) {
 
 // Экспортируем функции
 window.TreeData = {
-    treeData,
-    dataMap,
+    treeData: () => treeData,
+    dataMap: () => dataMap,
     getChildren,
     renderTree,
-    createTreeNode
+    createTreeNode,
+    initializeTreeData
 };

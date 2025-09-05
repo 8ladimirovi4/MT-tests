@@ -11,15 +11,24 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./components/tree/tree-styles.css">
     <title>Document</title>
+    <script src="./api-client.js" defer></script>
     <script src="./components/tree/tree-data.js" defer></script>
     <script src="./index.js" defer></script>
 </head>
 
 <body>
+<!-- Кнопка загрузки данных -->
+<div class="load-section">
+    <button id="load-tree-btn" class="load-btn">Загрузить дерево с сервера</button>
+    <div id="loading-indicator" class="loading-indicator" style="display: none;">
+        Загрузка данных...
+    </div>
+</div>
+
 <!-- Древовидный компонент -->
-<div class="tree-container" id="tree-container">
-    <div class="tree-header">
-        Древовидная структура (200 элементов)
+<div class="tree-container" id="tree-container" style="display: none;">
+    <div class="tree-header" id="tree-header">
+        Древовидная структура (нажмите кнопку для загрузки)
     </div>
     <div class="tree-stats" id="tree-stats">
         Загрузка...
@@ -30,12 +39,32 @@
 // Функция для обновления статистики
 function updateTreeStats() {
     const statsElement = document.getElementById('tree-stats');
-    if (!statsElement) return;
+    const headerElement = document.getElementById('tree-header');
     
-    const systemPackCount = 100;
-    const bmrzCount = 100;
+    if (!statsElement || !headerElement) return;
+    
+    // Получаем данные из TreeData
+    const treeData = window.TreeData.treeData();
+    const dataMap = window.TreeData.dataMap();
+    
+    let systemPackCount = 0;
+    let bmrzCount = 0;
+    
+    // Подсчитываем элементы по типам
+    dataMap.forEach(item => {
+        if (item.type === 'system_pack') {
+            systemPackCount++;
+        } else if (item.type === 'bmrz') {
+            bmrzCount++;
+        }
+    });
+    
     const totalCount = systemPackCount + bmrzCount;
     
+    // Обновляем заголовок
+    headerElement.textContent = `Древовидная структура (${totalCount} элементов)`;
+    
+    // Обновляем статистику
     statsElement.innerHTML = `
         System Pack: ${systemPackCount} элементов | 
         BMRZ: ${bmrzCount} элементов | 
@@ -43,17 +72,43 @@ function updateTreeStats() {
     `;
 }
 
-// Инициализация дерева при загрузке страницы
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    // Обновляем статистику
-    updateTreeStats();
+    const loadBtn = document.getElementById('load-tree-btn');
+    const loadingIndicator = document.getElementById('loading-indicator');
     
-    // Рендерим дерево
-    if (window.TreeData && window.TreeData.renderTree) {
-        window.TreeData.renderTree();
-    } else {
-        console.error('TreeData не загружен');
-    }
+    // Обработчик клика по кнопке загрузки
+    loadBtn.addEventListener('click', async function() {
+        try {
+            // Показываем индикатор загрузки
+            loadBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+            
+            // Инициализируем данные с сервера
+            const success = await window.TreeData.initializeTreeData();
+            
+            if (success) {
+                // Обновляем статистику
+                updateTreeStats();
+                
+                // Рендерим дерево
+                window.TreeData.renderTree();
+                
+                // Скрываем кнопку после успешной загрузки
+                loadBtn.style.display = 'none';
+                loadingIndicator.style.display = 'none';
+            } else {
+                throw new Error('Не удалось загрузить данные с сервера');
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке данных:', error);
+            alert('Ошибка при загрузке данных: ' + error.message);
+            
+            // Восстанавливаем кнопку
+            loadBtn.disabled = false;
+            loadingIndicator.style.display = 'none';
+        }
+    });
 });
 </script>
 </body>
