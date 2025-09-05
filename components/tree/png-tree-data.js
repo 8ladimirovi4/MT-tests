@@ -7,11 +7,32 @@
 let pngTreeData = [];
 let pngDataMap = new Map();
 
+// Base64 данные для PNG иконок
+let pngBase64Data = null;
+
+// Функция для загрузки base64 данных PNG
+async function loadPngBase64Data() {
+    try {
+        const response = await fetch('./png_base64_data.json');
+        pngBase64Data = await response.json();
+        return true;
+    } catch (error) {
+        console.error('Ошибка при загрузке base64 данных PNG:', error);
+        return false;
+    }
+}
+
 // Функция для инициализации PNG данных с сервера
-async function initializePngTreeData(itemsCount = 2000) {
+async function initializePngTreeData(itemsCount = 10) {
     try {
         if (!window.treeApiClient) {
             throw new Error('API клиент не загружен');
+        }
+        
+        // Загружаем base64 данные PNG
+        const base64Loaded = await loadPngBase64Data();
+        if (!base64Loaded) {
+            throw new Error('Не удалось загрузить base64 данные PNG');
         }
         
         const serverData = await window.treeApiClient.loadPngTreeData(itemsCount);
@@ -70,9 +91,19 @@ function createPngTreeNode(item, level) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'tree-node-content';
     
-    // Создаем иконку PNG
+    // Создаем иконку PNG с base64 данными
     const iconImg = document.createElement('img');
-    iconImg.src = `../${item.icon}`;
+    
+    // Определяем правильный base64 источник в зависимости от типа элемента
+    if (item.type === 'bmrz' && pngBase64Data && pngBase64Data.bmrz) {
+        iconImg.src = pngBase64Data.bmrz;
+    } else if (item.type === 'system_pack' && pngBase64Data && pngBase64Data.systemPact) {
+        iconImg.src = pngBase64Data.systemPact;
+    } else {
+        // Fallback на файловый путь, если base64 данные недоступны
+        iconImg.src = `../${item.icon}`;
+    }
+    
     iconImg.alt = item.name;
     iconImg.className = 'tree-node-icon';
     iconImg.style.width = '24px';
@@ -110,5 +141,6 @@ window.PngTreeData = {
     getChildren: getPngChildren,
     renderTree: renderPngTree,
     createTreeNode: createPngTreeNode,
-    initializeTreeData: initializePngTreeData
+    initializeTreeData: initializePngTreeData,
+    loadPngBase64Data: loadPngBase64Data
 };
