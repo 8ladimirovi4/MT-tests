@@ -2,8 +2,8 @@ import React, { useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import * as echarts from 'echarts';
 import { Button } from 'primereact/button';
-import type { RootState } from '../store/store';
 import { useChartZoom } from '../features/zoom';
+import type { RootState } from '../store/store';
 
 const EChartsChart: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);

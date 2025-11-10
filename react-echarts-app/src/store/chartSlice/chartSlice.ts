@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import {  generateVoltageData, xAxisLabels, extendedBarData } from './model/data';
 
 export interface ChartOption {
   title: {
@@ -9,11 +10,18 @@ export interface ChartOption {
   xAxis: {
     data: string[];
   };
-  yAxis: {};
+  yAxis: Array<{
+    type?: string;
+    name?: string;
+    position?: string;
+    min?: number;
+    max?: number;
+  }>;
   series: Array<{
     name: string;
     type: string;
-    data: number[];
+    data: (number | null)[];
+    yAxisIndex?: number;
   }>;
   dataZoom: Array<{
     type: string;
@@ -29,14 +37,34 @@ const initialState: ChartOption = {
   },
   tooltip: {},
   xAxis: {
-    data: ['shirt', 'cardigan', 'chiffon', 'pants', 'heels', 'socks']
+    data: xAxisLabels
   },
-  yAxis: {},
+  yAxis: [
+    {
+      type: 'value',
+      name: 'Продажи',
+      position: 'left',
+    },
+    {
+      type: 'value',
+      name: 'Напряжение (В)',
+      position: 'right',
+      min: 190,
+      max: 250,
+    }
+  ],
   series: [
     {
       name: 'sales',
       type: 'bar',
-      data: [5, 20, 36, 10, 10, 20]
+      data: extendedBarData,
+      yAxisIndex: 0,
+    },
+    {
+      name: 'Напряжение',
+      type: 'line',
+      data: generateVoltageData(),
+      yAxisIndex: 1,
     }
   ],
   dataZoom: [  // конфигурация для поддержки масштабирования
