@@ -15,6 +15,12 @@ export interface ChartOption {
     type: string;
     data: number[];
   }>;
+  dataZoom: Array<{
+    type: string;
+    show: boolean;
+    start: number;
+    end: number;
+  }>;
 }
 
 const initialState: ChartOption = {
@@ -32,7 +38,15 @@ const initialState: ChartOption = {
       type: 'bar',
       data: [5, 20, 36, 10, 10, 20]
     }
-  ]
+  ],
+  dataZoom: [  // конфигурация для поддержки масштабирования
+    {
+      type: 'slider',
+      show: true,
+      start: 0,
+      end: 100,
+    },
+  ],
 };
 
 const chartSlice = createSlice({
