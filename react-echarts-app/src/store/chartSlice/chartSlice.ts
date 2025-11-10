@@ -41,6 +41,11 @@ export interface ChartOption {
     data: (number | null)[];
     yAxisIndex?: number;
     xAxisIndex?: number;
+    lineStyle?: {
+      color?: string;
+      width?: number;
+      type?: 'solid' | 'dashed' | 'dotted';
+    };
   }>;
   dataZoom: Array<{
     type: string;
@@ -112,6 +117,11 @@ const initialState: ChartOption = {
       data: generateVoltageData(),
       yAxisIndex: 1,
       xAxisIndex: 1,
+      lineStyle: {
+        color: '#5470c6',
+        width: 2,
+        type: 'solid',
+      },
     }
   ],
   dataZoom: [  // конфигурация для поддержки масштабирования
@@ -135,10 +145,23 @@ const chartSlice = createSlice({
       if (state.series[action.payload.seriesIndex]) {
         state.series[action.payload.seriesIndex].data = action.payload.data;
       }
+    },
+    updateTrendStyle: (state, action: PayloadAction<{ color: string; thickness: number; style: 'solid' | 'dashed' | 'dotted' }>) => {
+      const trendSeriesIndex = state.series.findIndex((s) => s.name === 'Напряжение');
+      if (trendSeriesIndex !== -1) {
+        // Цвет уже нормализован в модальном окне (с #)
+        const colorValue = action.payload.color
+
+        state.series[trendSeriesIndex].lineStyle = {
+          color: colorValue,
+          width: action.payload.thickness,
+          type: action.payload.style,
+        };
+      }
     }
   }
 });
 
-export const { updateChartOption, updateSeriesData } = chartSlice.actions;
+export const { updateChartOption, updateSeriesData, updateTrendStyle } = chartSlice.actions;
 export default chartSlice.reducer;
 

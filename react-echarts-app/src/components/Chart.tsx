@@ -1,16 +1,22 @@
-import React, { useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useRef, useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import * as echarts from 'echarts';
 import { Button } from 'primereact/button';
 import { useChartZoom } from '../features/zoom';
+import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
+import { updateTrendStyle } from '../store/chartSlice/chartSlice';
 import type { RootState } from '../store/store';
 
 const EChartsChart: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
+  const dispatch = useDispatch();
 
   // Получаем данные из chartSlice
   const chartOption = useSelector((state: RootState) => state.chart);
+
+  // Состояние для модального окна
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Используем хук для масштабирования
   const { zoomIn, zoomOut, resetZoom } = useChartZoom(chartInstance);
@@ -43,6 +49,49 @@ const EChartsChart: React.FC = () => {
     }
   }, [chartOption]);
 
+  // Обработчик клика на графике - подписываемся один раз при монтировании
+  useEffect(() => {
+    if (!chartInstance.current) return;
+
+    const handleChartClick = (params: any) => {
+      // Проверяем, что клик был по серии "Напряжение" (тренд)
+      if (params?.seriesName === 'Напряжение') {
+        setIsModalVisible(true);
+      }
+    };
+
+    const instance = chartInstance.current;
+    instance.on('click', handleChartClick);
+
+    return () => {
+      // Безопасная отписка: используем try-catch, так как экземпляр может быть уже disposed
+      // Метод off() используется для очистки обработчиков событий и предотвращения утечек памяти
+      try {
+        if (instance) {
+          instance.off('click', handleChartClick);
+        }
+      } catch (error) {
+        // Игнорируем ошибки, если экземпляр уже был disposed
+        // Это нормально, так как cleanup может вызываться после dispose
+      }
+    };
+  }, []); // Подписываемся только один раз при монтировании
+
+  // Получаем текущие настройки тренда из store
+  const getCurrentTrendSettings = (): TrendStyleSettings => {
+    const trendSeries = chartOption.series.find((s) => s.name === 'Напряжение');
+    // Цвет, толщина и стиль находятся в lineStyle, а не напрямую в series
+    return {
+      color: trendSeries?.lineStyle?.color || '#5470c6',
+      thickness: trendSeries?.lineStyle?.width || 2,
+      style: trendSeries?.lineStyle?.type || 'solid',
+    };
+  };
+
+  const handleApplySettings = (settings: TrendStyleSettings) => {
+    dispatch(updateTrendStyle(settings));
+  };
+
   return (
     <div style={{ width: '100%' }}>
       <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
@@ -51,6 +100,12 @@ const EChartsChart: React.FC = () => {
         <Button label="Сбросить" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />
       </div>
       <div ref={chartRef} style={{ width: '100%', height: '400px' }} />
+      <TrendStyleModal
+        visible={isModalVisible}
+        onHide={() => setIsModalVisible(false)}
+        initialSettings={getCurrentTrendSettings()}
+        onApply={handleApplySettings}
+      />
     </div>
   );
 };
