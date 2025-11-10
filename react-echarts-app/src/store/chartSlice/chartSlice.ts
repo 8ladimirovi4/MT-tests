@@ -6,7 +6,22 @@ export interface ChartOption {
   title: {
     text: string;
   };
-  tooltip: {};
+  tooltip: {
+    trigger?: string;
+    axisPointer?: {
+      type?: string;
+      crossStyle?: {
+        color?: string;
+        width?: number;
+        type?: string;
+      };
+      lineStyle?: {
+        color?: string;
+        width?: number;
+        type?: string;
+      };
+    };
+  };
   xAxis: Array<{
     type?: string;
     data?: string[];
@@ -39,7 +54,22 @@ const initialState: ChartOption = {
   title: {
     text: 'ECharts Getting Started Example'
   },
-  tooltip: {},
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+      crossStyle: {
+        color: '#999',
+        width: 1,
+        type: 'dashed'
+      },
+      lineStyle: {
+        color: '#999',
+        width: 1,
+        type: 'dashed'
+      }
+    }
+  },
   xAxis: [
     {
       type: 'category',
