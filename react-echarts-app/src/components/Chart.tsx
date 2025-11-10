@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import * as echarts from 'echarts';
+import { Button } from 'primereact/button';
 import type { RootState } from '../store/store';
 import { useChartZoom } from '../features/zoom';
 
@@ -45,9 +46,9 @@ const EChartsChart: React.FC = () => {
   return (
     <div style={{ width: '100%' }}>
       <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
-        <button onClick={zoomIn}>Увеличить (x2)</button>
-        <button onClick={zoomOut}>Уменьшить (x2)</button>
-        <button onClick={resetZoom}>Сбросить</button>
+        <Button label="Увеличить (x2)" icon="pi pi-search-plus" onClick={zoomIn} />
+        <Button label="Уменьшить (x2)" icon="pi pi-search-minus" onClick={zoomOut} />
+        <Button label="Сбросить" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />
       </div>
       <div ref={chartRef} style={{ width: '100%', height: '400px' }} />
     </div>

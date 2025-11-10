@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button } from 'primereact/button'
 import ChartComponent from './components/Chart'
 import DummiPage from './components/DummiPage'
 import './App.css'
@@ -12,7 +13,15 @@ function App() {
   return (
     <div className="app-container">
       <h1>Apache echarts</h1>
-      <button onClick={handleDummiPage}>Toggle Page</button>
+      <Button 
+        label="Toggle Page" 
+        icon="pi pi-arrows-h" 
+        onClick={handleDummiPage}
+        outlined
+      />
+      <div style={{height: '50px'}}>
+        
+      </div>
       {isDummiPage ? <DummiPage /> : <ChartComponent />}
     </div>
   )
