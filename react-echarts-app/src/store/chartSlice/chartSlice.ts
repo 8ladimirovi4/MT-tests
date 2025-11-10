@@ -41,6 +41,7 @@ export interface ChartOption {
     data: (number | null)[];
     yAxisIndex?: number;
     xAxisIndex?: number;
+    triggerLineEvent?: boolean;
     lineStyle?: {
       color?: string;
       width?: number;
@@ -117,6 +118,7 @@ const initialState: ChartOption = {
       data: generateVoltageData(),
       yAxisIndex: 1,
       xAxisIndex: 1,
+      triggerLineEvent: true, // click on line
       lineStyle: {
         color: '#5470c6',
         width: 2,

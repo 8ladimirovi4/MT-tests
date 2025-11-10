@@ -60,21 +60,8 @@ const EChartsChart: React.FC = () => {
       }
     };
 
-    const instance = chartInstance.current;
-    instance.on('click', handleChartClick);
+    chartInstance.current.on('click', handleChartClick);
 
-    return () => {
-      // Безопасная отписка: используем try-catch, так как экземпляр может быть уже disposed
-      // Метод off() используется для очистки обработчиков событий и предотвращения утечек памяти
-      try {
-        if (instance) {
-          instance.off('click', handleChartClick);
-        }
-      } catch (error) {
-        // Игнорируем ошибки, если экземпляр уже был disposed
-        // Это нормально, так как cleanup может вызываться после dispose
-      }
-    };
   }, []); // Подписываемся только один раз при монтировании
 
   // Получаем текущие настройки тренда из store
