@@ -1,15 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import {  generateVoltageData, xAxisLabels, extendedBarData } from './model/data';
+import {  generateVoltageData, timeLabels, barData, barLabels } from './model/data';
 
 export interface ChartOption {
   title: {
     text: string;
   };
   tooltip: {};
-  xAxis: {
-    data: string[];
-  };
+  xAxis: Array<{
+    type?: string;
+    data?: string[];
+    position?: string;
+    name?: string;
+  }>;
   yAxis: Array<{
     type?: string;
     name?: string;
@@ -22,6 +25,7 @@ export interface ChartOption {
     type: string;
     data: (number | null)[];
     yAxisIndex?: number;
+    xAxisIndex?: number;
   }>;
   dataZoom: Array<{
     type: string;
@@ -36,9 +40,20 @@ const initialState: ChartOption = {
     text: 'ECharts Getting Started Example'
   },
   tooltip: {},
-  xAxis: {
-    data: xAxisLabels
-  },
+  xAxis: [
+    {
+      type: 'category',
+      data: barLabels,
+      position: 'top',
+      name: 'Названия гистограмм',
+    },
+    {
+      type: 'category',
+      data: timeLabels,
+      position: 'bottom',
+      name: 'Время',
+    }
+  ],
   yAxis: [
     {
       type: 'value',
@@ -57,14 +72,16 @@ const initialState: ChartOption = {
     {
       name: 'sales',
       type: 'bar',
-      data: extendedBarData,
+      data: barData,
       yAxisIndex: 0,
+      xAxisIndex: 0,
     },
     {
       name: 'Напряжение',
       type: 'line',
       data: generateVoltageData(),
       yAxisIndex: 1,
+      xAxisIndex: 1,
     }
   ],
   dataZoom: [  // конфигурация для поддержки масштабирования
