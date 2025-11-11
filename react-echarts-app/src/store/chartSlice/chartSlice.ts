@@ -54,6 +54,13 @@ export interface ChartOption {
     start: number;
     end: number;
   }>;
+  legend?: {
+    orient?: 'horizontal' | 'vertical';
+    left?: string | number;
+    right?: string | number;
+    top?: string | number;
+    bottom?: string | number;
+  };
 }
 
 const initialState: ChartOption = {
@@ -75,6 +82,11 @@ const initialState: ChartOption = {
         type: 'dashed'
       }
     }
+  },
+  legend: {
+    orient: 'horizontal',
+    left: 'center',
+    bottom: 0
   },
   xAxis: [
     {
@@ -120,7 +132,7 @@ const initialState: ChartOption = {
       xAxisIndex: 1,
       triggerLineEvent: true, // click on line
       lineStyle: {
-        color: '#5470c6',
+        color: '#70f078',
         width: 2,
         type: 'solid',
       },

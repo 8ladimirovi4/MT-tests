@@ -20,7 +20,7 @@ export const generateTimeLabels = (): string[] => {
   };
   
   // Исходные данные гистограммы
-export const barLabels = ['shirt', 'cardigan', 'chiffon', 'pants', 'heels', 'socks'];
+export const barLabels = ['paramA', 'paramB', 'paramC', 'paramD', 'paramE', 'paramF'];
 export const barData = [5, 20, 36, 10, 10, 20];
 
   // Экспортируем метки времени для оси X (нижняя ось)
