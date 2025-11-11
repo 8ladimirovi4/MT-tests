@@ -2,17 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from 'primereact/button'
 import ChartComponent from './components/Chart'
 import DummiPage from './components/DummiPage'
+import WSSDataDisplay, { type WebSocketData } from './components/WSSDataDisplay'
+import RESTDataDisplay from './components/RESTDataDisplay'
 import './App.css'
-
-interface WebSocketData {
-  id: number
-  value: number
-  temperature: string
-  humidity: string
-  pressure: string
-  timestamp: string
-  status: string
-}
 
 function App() {
   const [isDummiPage, setIsDummiPage] = useState(false)
@@ -124,59 +116,8 @@ function App() {
           severity={wsConnected ? "danger" : "success"}
         />
       </div>
-      {serverResponse && (
-        <div style={{ 
-          marginBottom: '20px', 
-          padding: '10px', 
-          backgroundColor: '#f5f5f5', 
-          borderRadius: '4px',
-          fontFamily: 'monospace',
-          fontSize: '12px'
-        }}>
-          <strong>Server Response:</strong>
-          <pre style={{ margin: '5px 0 0 0', whiteSpace: 'pre-wrap' }}>{serverResponse}</pre>
-        </div>
-      )}
-      {wsData && (
-        <div style={{ 
-          marginBottom: '20px', 
-          padding: '15px', 
-          backgroundColor: wsConnected ? '#e8f5e9' : '#fff3e0', 
-          borderRadius: '4px',
-          border: `2px solid ${wsConnected ? '#4caf50' : '#ff9800'}`,
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-            <strong style={{ fontSize: '16px' }}>WebSocket Data:</strong>
-            <span style={{ 
-              padding: '4px 8px', 
-              borderRadius: '4px', 
-              backgroundColor: wsConnected ? '#4caf50' : '#ff9800',
-              color: 'white',
-              fontSize: '12px',
-              fontWeight: 'bold'
-            }}>
-              {wsConnected ? 'Connected' : 'Disconnected'}
-            </span>
-          </div>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: '10px',
-            fontFamily: 'monospace',
-            fontSize: '14px'
-          }}>
-            <div><strong>ID:</strong> {wsData.id}</div>
-            <div><strong>Value:</strong> {wsData.value}</div>
-            <div><strong>Temperature:</strong> {wsData.temperature}°C</div>
-            <div><strong>Humidity:</strong> {wsData.humidity}%</div>
-            <div><strong>Pressure:</strong> {wsData.pressure} hPa</div>
-            <div><strong>Status:</strong> {wsData.status}</div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <strong>Timestamp:</strong> {new Date(wsData.timestamp).toLocaleString()}
-            </div>
-          </div>
-        </div>
-      )}
+      <RESTDataDisplay data={serverResponse} />
+      <WSSDataDisplay data={wsData} isConnected={wsConnected} />
       <div style={{height: '50px'}}>
         
       </div>
