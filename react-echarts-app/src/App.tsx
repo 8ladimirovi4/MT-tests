@@ -4,6 +4,7 @@ import ChartComponent from './components/Chart'
 import DummiPage from './components/DummiPage'
 import WSSDataDisplay, { type WebSocketData } from './components/WSSDataDisplay'
 import RESTDataDisplay from './components/RESTDataDisplay'
+import { checkServerHealth, createWebSocketConnection, closeWebSocketConnection } from './api'
 import './App.css'
 
 function App() {
@@ -22,8 +23,7 @@ function App() {
     setIsLoading(true)
     setServerResponse(null)
     try {
-      const response = await fetch('/api/health')
-      const data = await response.json()
+      const data = await checkServerHealth()
       setServerResponse(JSON.stringify(data, null, 2))
     } catch (error) {
       setServerResponse(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -35,59 +35,41 @@ function App() {
   const handleTestWSS = () => {
     if (wsConnected && wsRef.current) {
       // Отключаемся от WebSocket
-      wsRef.current.send(JSON.stringify({ type: 'stop' }))
-      wsRef.current.close()
+      closeWebSocketConnection(wsRef.current)
       wsRef.current = null
       setWsConnected(false)
       setWsData(null)
     } else {
       // Подключаемся к WebSocket
-      const ws = new WebSocket('ws://localhost:3000')
-      wsRef.current = ws
-
-      ws.onopen = () => {
-        console.log('WebSocket connected')
-        setWsConnected(true)
-        // Запрашиваем старт потока данных
-        ws.send(JSON.stringify({ type: 'start' }))
-      }
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data)
-          console.log('Received WebSocket message:', message)
-          
+      const ws = createWebSocketConnection('ws://localhost:3000', {
+        onOpen: () => {
+          setWsConnected(true)
+        },
+        onMessage: (message) => {
           if (message.type === 'data' && message.data) {
-            setWsData(message.data)
+            setWsData(message.data as WebSocketData)
           } else if (message.type === 'welcome') {
             setServerResponse(`WebSocket: ${message.message}`)
           }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error)
+        },
+        onError: () => {
+          setServerResponse('WebSocket connection error')
+          setWsConnected(false)
+        },
+        onClose: () => {
+          setWsConnected(false)
+          setWsData(null)
+          wsRef.current = null
         }
-      }
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error)
-        setServerResponse('WebSocket connection error')
-        setWsConnected(false)
-      }
-
-      ws.onclose = () => {
-        console.log('WebSocket disconnected')
-        setWsConnected(false)
-        setWsData(null)
-        wsRef.current = null
-      }
+      })
+      wsRef.current = ws
     }
   }
 
   // Очистка при размонтировании компонента
   useEffect(() => {
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
+      closeWebSocketConnection(wsRef.current)
     }
   }, [])
 
