@@ -22,6 +22,9 @@ const EChartsChart: React.FC = () => {
 
   // Состояние для модального окна
   const [isModalVisible, setIsModalVisible] = useState(false);
+  
+  // Счетчик данных для тренда напряжения
+  const [voltageDataCount, setVoltageDataCount] = useState(0);
 
   // Используем хук для масштабирования
   const { zoomIn, zoomOut, resetZoom } = useChartZoom(chartInstance);
@@ -129,6 +132,8 @@ const EChartsChart: React.FC = () => {
       // Переключаемся на live режим
       dispatch(setChartMode('live'));
       dispatch(resetLiveData());
+      // Сбрасываем счетчик при переключении на live режим
+      setVoltageDataCount(0);
       
       // Подключаемся к WebSocket
       const ws = createChartWebSocketConnection('ws://localhost:3000', {
@@ -142,6 +147,8 @@ const EChartsChart: React.FC = () => {
               barValues: message.data.barValues,
               elapsedSeconds: message.data.elapsedSeconds,
             }));
+            // Увеличиваем счетчик для тренда напряжения
+            setVoltageDataCount((prev) => prev + 1);
           }
         },
         onError: () => {
@@ -177,13 +184,24 @@ const EChartsChart: React.FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
         <Button
           label={chartMode === 'live' ? 'Historical' : 'Live'}
           icon={chartMode === 'live' ? 'pi pi-history' : 'pi pi-wifi'}
           onClick={handleToggleMode}
           severity={chartMode === 'live' ? 'warning' : 'success'}
         />
+        {chartMode === 'live' && (
+          <div style={{ 
+            padding: '8px 16px', 
+            backgroundColor: '#f0f0f0', 
+            borderRadius: '4px',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            Данных по напряжению: <strong>{voltageDataCount}</strong>
+          </div>
+        )}
         <Button label="Увеличить (x2)" icon="pi pi-search-plus" onClick={zoomIn} />
         <Button label="Уменьшить (x2)" icon="pi pi-search-minus" onClick={zoomOut} />
         <Button label="Сбросить масштаб" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />

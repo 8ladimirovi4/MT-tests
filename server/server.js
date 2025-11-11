@@ -148,17 +148,17 @@ wss.on('connection', (ws, req) => {
         
         chartStartTime = Date.now();
         
-        // Отправляем данные раз в секунду
+        // Отправляем данные каждые 300 миллисекунд
         chartDataInterval = setInterval(() => {
           if (ws.readyState === ws.OPEN) {
-            const elapsedSeconds = Math.floor((Date.now() - chartStartTime) / 1000);
+            const elapsedSeconds = (Date.now() - chartStartTime) / 1000;
             const chartData = generateChartData(elapsedSeconds);
             ws.send(JSON.stringify({
               type: 'chartData',
               data: chartData
             }));
           }
-        }, 1000);
+        }, 5000);
         
         ws.send(JSON.stringify({
           type: 'chartStarted',
