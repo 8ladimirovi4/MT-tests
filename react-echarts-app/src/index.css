@@ -1,0 +1,17 @@
+/* Стили для полноэкранного режима - убираем темный фон браузера */
+:fullscreen {
+  background-color: #ffffff !important;
+}
+
+:-webkit-full-screen {
+  background-color: #ffffff !important;
+}
+
+:-moz-full-screen {
+  background-color: #ffffff !important;
+}
+
+:-ms-fullscreen {
+  background-color: #ffffff !important;
+}
+
