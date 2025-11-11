@@ -6,7 +6,7 @@ import { useChartZoom } from '../features/zoom';
 import { useFullscreen } from '../features/fullscreen';
 import { useChartDownload } from '../features/download';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
-import { updateTrendStyle } from '../store/chartSlice/chartSlice';
+import { updateTrendStyle, updateYAxisVisibility } from '../store/chartSlice/chartSlice';
 import type { RootState } from '../store/store';
 
 const EChartsChart: React.FC = () => {
@@ -74,12 +74,28 @@ const EChartsChart: React.FC = () => {
 
     chartInstance.current.on('click', handleChartClick);
     
-    // события легенды
-    chartInstance.current.on('legendselectchanged', (params) => {
-      console.log('======>legend params',params)
-    });
+    // Обработка событий легенды для управления видимостью осей Y
+    const handleLegendSelectChanged = (params: any) => {   
+      const selected = params.selected || {};
+      
+      // Проверяем видимость серий для каждой оси Y
+      // yAxisIndex 0 используется серией 'sales' (гистограмма)
+      // yAxisIndex 1 используется серией 'Напряжение' (тренд)
+      
+      // Проверяем ось Y для гистограммы (yAxisIndex 0)
+      // Серия 'sales' использует yAxisIndex 0
+      const barSeriesVisible = selected['sales'] !== false;
+      dispatch(updateYAxisVisibility({ yAxisIndex: 0, show: barSeriesVisible }));
+      
+      // Проверяем ось Y для тренда (yAxisIndex 1)
+      // Серия 'Напряжение' использует yAxisIndex 1
+      const trendSeriesVisible = selected['Напряжение'] !== false;
+      dispatch(updateYAxisVisibility({ yAxisIndex: 1, show: trendSeriesVisible }));
+    };
+    
+    chartInstance.current.on('legendselectchanged', handleLegendSelectChanged);
 
-  }, []); // Подписываемся только один раз при монтировании
+  }, [dispatch]); // dispatch стабилен, но добавляем для соответствия правилам React
 
   // Получаем текущие настройки тренда из store
   const getCurrentTrendSettings = (): TrendStyleSettings => {

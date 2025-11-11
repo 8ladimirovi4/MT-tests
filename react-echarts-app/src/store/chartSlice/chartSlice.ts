@@ -39,6 +39,7 @@ export interface ChartOption {
     position?: string;
     min?: number;
     max?: number;
+    show?: boolean;
   }>;
   series: Array<{
     name: string;
@@ -117,6 +118,7 @@ const initialState: ChartOption = {
       type: 'value',
       name: 'Продажи',
       position: 'left',
+      show: true,
     },
     {
       type: 'value',
@@ -124,6 +126,7 @@ const initialState: ChartOption = {
       position: 'right',
       min: 190,
       max: 250,
+      show: true,
     }
   ],
   series: [
@@ -183,10 +186,15 @@ const chartSlice = createSlice({
           type: action.payload.style,
         };
       }
+    },
+    updateYAxisVisibility: (state, action: PayloadAction<{ yAxisIndex: number; show: boolean }>) => {
+      if (state.yAxis[action.payload.yAxisIndex]) {
+        state.yAxis[action.payload.yAxisIndex].show = action.payload.show;
+      }
     }
   }
 });
 
-export const { updateChartOption, updateSeriesData, updateTrendStyle } = chartSlice.actions;
+export const { updateChartOption, updateSeriesData, updateTrendStyle, updateYAxisVisibility } = chartSlice.actions;
 export default chartSlice.reducer;
 
