@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as echarts from 'echarts';
 import { Button } from 'primereact/button';
 import { useChartZoom } from '../features/zoom';
+import { useFullscreen } from '../features/fullscreen';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
 import { updateTrendStyle } from '../store/chartSlice/chartSlice';
 import type { RootState } from '../store/store';
@@ -20,6 +21,13 @@ const EChartsChart: React.FC = () => {
 
   // Используем хук для масштабирования
   const { zoomIn, zoomOut, resetZoom } = useChartZoom(chartInstance);
+
+  // Используем хук для полноэкранного режима
+  // Используем chartRef напрямую, так как это уже контейнер для графика
+  const { isFullscreen, toggleFullscreen, isSupported: isFullscreenSupported } = useFullscreen(
+    chartRef,
+    chartInstance
+  );
 
   useEffect(() => {
     // Инициализируем экземпляр ECharts при монтировании компонента
@@ -90,6 +98,14 @@ const EChartsChart: React.FC = () => {
         <Button label="Увеличить (x2)" icon="pi pi-search-plus" onClick={zoomIn} />
         <Button label="Уменьшить (x2)" icon="pi pi-search-minus" onClick={zoomOut} />
         <Button label="Сбросить" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />
+        {isFullscreenSupported && (
+          <Button
+            label={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
+            icon={isFullscreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'}
+            onClick={toggleFullscreen}
+            severity="info"
+          />
+        )}
       </div>
       <div ref={chartRef} style={{ width: '100%', height: '400px' }} />
       <TrendStyleModal
