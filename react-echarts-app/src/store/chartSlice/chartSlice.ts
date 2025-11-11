@@ -47,6 +47,7 @@ export interface ChartOption {
     yAxisIndex?: number;
     xAxisIndex?: number;
     triggerLineEvent?: boolean;
+    connectNulls?: boolean; // Не соединять точки при отсутствии данных (создает разрывы)
     lineStyle?: {
       color?: string;
       width?: number;
@@ -140,6 +141,7 @@ const initialState: ChartOption = {
       yAxisIndex: 1,
       xAxisIndex: 1,
       triggerLineEvent: true, // click on line
+      connectNulls: false, // Не соединять точки при отсутствии данных (создает разрывы)
       lineStyle: {
         color: '#70f078',
         width: 2,
@@ -164,7 +166,7 @@ const chartSlice = createSlice({
     updateChartOption: (state, action: PayloadAction<Partial<ChartOption>>) => {
       return { ...state, ...action.payload };
     },
-    updateSeriesData: (state, action: PayloadAction<{ seriesIndex: number; data: number[] }>) => {
+    updateSeriesData: (state, action: PayloadAction<{ seriesIndex: number; data: (number | null)[] }>) => {
       if (state.series[action.payload.seriesIndex]) {
         state.series[action.payload.seriesIndex].data = action.payload.data;
       }
