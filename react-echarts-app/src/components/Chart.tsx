@@ -61,6 +61,11 @@ const EChartsChart: React.FC = () => {
     };
 
     chartInstance.current.on('click', handleChartClick);
+    
+    // события легенды
+    chartInstance.current.on('legendselectchanged', (params) => {
+      console.log('======>legend params',params)
+    });
 
   }, []); // Подписываемся только один раз при монтировании
 

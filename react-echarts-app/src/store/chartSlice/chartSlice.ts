@@ -27,6 +27,11 @@ export interface ChartOption {
     data?: string[];
     position?: string;
     name?: string;
+    nameLocation?: 'start' | 'middle' | 'end';
+    nameGap?: number;
+    nameTextStyle?: {
+      align?: 'left' | 'center' | 'right';
+    };
   }>;
   yAxis: Array<{
     type?: string;
@@ -86,20 +91,24 @@ const initialState: ChartOption = {
   legend: {
     orient: 'horizontal',
     left: 'center',
-    bottom: 0
+    bottom: -5
   },
   xAxis: [
     {
       type: 'category',
       data: barLabels,
-      position: 'top',
-      name: 'Названия гистограмм',
+      position: 'top', 
     },
     {
       type: 'category',
       data: timeLabels,
       position: 'bottom',
       name: 'Время',
+      nameLocation: 'end',
+      nameGap: 15,
+      nameTextStyle: {
+        align: 'right',
+      },
     }
   ],
   yAxis: [
