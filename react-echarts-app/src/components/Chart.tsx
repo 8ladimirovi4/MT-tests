@@ -6,7 +6,7 @@ import { useChartZoom } from '../features/zoom';
 import { useFullscreen } from '../features/fullscreen';
 import { useChartDownload } from '../features/download';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
-import { updateTrendStyle, updateYAxisVisibility, setChartMode, updateLiveData, resetLiveData } from '../store/chartSlice/chartSlice';
+import { updateTrendStyle, updateYAxisVisibility, setChartMode, updateLiveData, resetLiveData, type ChartMode } from '../store/chartSlice/chartSlice';
 import { createChartWebSocketConnection, closeChartWebSocketConnection, type ChartWebSocketMessage } from '../api/chartWebSocketApi';
 import type { RootState } from '../store/store';
 
@@ -18,7 +18,7 @@ const EChartsChart: React.FC = () => {
 
   // Получаем данные из chartSlice
   const chartOption = useSelector((state: RootState) => state.chart);
-  const chartMode = useSelector((state: RootState) => (state.chart as any).mode || 'historical');
+  const chartMode = useSelector((state: RootState): ChartMode => state.chart.mode || 'historical');
 
   // Состояние для модального окна
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -60,7 +60,10 @@ const EChartsChart: React.FC = () => {
       // Добавляем dataZoom конфигурацию для поддержки масштабирования
      
       // При получении данных обновляем опции графика
-      chartInstance.current.setOption(chartOption as echarts.EChartsOption);
+      // ChartOption совместим с EChartsOption, так как содержит все необходимые поля
+      // Исключаем поля, которые не являются частью EChartsOption
+      const { mode, historicalData, liveData, ...echartsOption } = chartOption;
+      chartInstance.current.setOption(echartsOption as echarts.EChartsOption);
     }
   }, [chartOption]);
 
@@ -68,9 +71,9 @@ const EChartsChart: React.FC = () => {
   useEffect(() => {
     if (!chartInstance.current) return;
 
-    const handleChartClick = (params: any) => {
+    const handleChartClick = (params: unknown) => {
       // Проверяем, что клик был по серии "Напряжение" (тренд)
-      if (params?.seriesName === 'Напряжение') {
+      if (params && typeof params === 'object' && 'seriesName' in params && params.seriesName === 'Напряжение') {
         setIsModalVisible(true);
       }
     };
@@ -78,22 +81,25 @@ const EChartsChart: React.FC = () => {
     chartInstance.current.on('click', handleChartClick);
     
     // Обработка событий легенды для управления видимостью осей Y
-    const handleLegendSelectChanged = (params: any) => {   
-      const selected = params.selected || {};
-      
-      // Проверяем видимость серий для каждой оси Y
-      // yAxisIndex 0 используется серией 'sales' (гистограмма)
-      // yAxisIndex 1 используется серией 'Напряжение' (тренд)
-      
-      // Проверяем ось Y для гистограммы (yAxisIndex 0)
-      // Серия 'sales' использует yAxisIndex 0
-      const barSeriesVisible = selected['sales'] !== false;
-      dispatch(updateYAxisVisibility({ yAxisIndex: 0, show: barSeriesVisible }));
-      
-      // Проверяем ось Y для тренда (yAxisIndex 1)
-      // Серия 'Напряжение' использует yAxisIndex 1
-      const trendSeriesVisible = selected['Напряжение'] !== false;
-      dispatch(updateYAxisVisibility({ yAxisIndex: 1, show: trendSeriesVisible }));
+    const handleLegendSelectChanged = (params: unknown) => {
+      // Типизируем параметры события легенды
+      if (params && typeof params === 'object' && 'selected' in params) {
+        const selected = (params as { selected: Record<string, boolean> }).selected || {};
+        
+        // Проверяем видимость серий для каждой оси Y
+        // yAxisIndex 0 используется серией 'sales' (гистограмма)
+        // yAxisIndex 1 используется серией 'Напряжение' (тренд)
+        
+        // Проверяем ось Y для гистограммы (yAxisIndex 0)
+        // Серия 'sales' использует yAxisIndex 0
+        const barSeriesVisible = selected['sales'] !== false;
+        dispatch(updateYAxisVisibility({ yAxisIndex: 0, show: barSeriesVisible }));
+        
+        // Проверяем ось Y для тренда (yAxisIndex 1)
+        // Серия 'Напряжение' использует yAxisIndex 1
+        const trendSeriesVisible = selected['Напряжение'] !== false;
+        dispatch(updateYAxisVisibility({ yAxisIndex: 1, show: trendSeriesVisible }));
+      }
     };
     
     chartInstance.current.on('legendselectchanged', handleLegendSelectChanged);
@@ -102,12 +108,12 @@ const EChartsChart: React.FC = () => {
 
   // Получаем текущие настройки тренда из store
   const getCurrentTrendSettings = (): TrendStyleSettings => {
-    const trendSeries = chartOption.series.find((s) => s.name === 'Напряжение');
+    const trendSeries = chartOption.series?.find((s) => s.name === 'Напряжение');
     // Цвет, толщина и стиль находятся в lineStyle, а не напрямую в series
     return {
       color: trendSeries?.lineStyle?.color || '#5470c6',
       thickness: trendSeries?.lineStyle?.width || 2,
-      style: trendSeries?.lineStyle?.type || 'solid',
+      style: (trendSeries?.lineStyle?.type as 'solid' | 'dashed' | 'dotted') || 'solid',
     };
   };
 
