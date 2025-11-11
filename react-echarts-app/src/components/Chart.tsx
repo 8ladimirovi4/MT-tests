@@ -6,16 +6,19 @@ import { useChartZoom } from '../features/zoom';
 import { useFullscreen } from '../features/fullscreen';
 import { useChartDownload } from '../features/download';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
-import { updateTrendStyle, updateYAxisVisibility } from '../store/chartSlice/chartSlice';
+import { updateTrendStyle, updateYAxisVisibility, setChartMode, updateLiveData, resetLiveData } from '../store/chartSlice/chartSlice';
+import { createChartWebSocketConnection, closeChartWebSocketConnection, type ChartWebSocketMessage } from '../api/chartWebSocketApi';
 import type { RootState } from '../store/store';
 
 const EChartsChart: React.FC = () => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
   const dispatch = useDispatch();
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Получаем данные из chartSlice
   const chartOption = useSelector((state: RootState) => state.chart);
+  const chartMode = useSelector((state: RootState) => (state.chart as any).mode || 'historical');
 
   // Состояние для модального окна
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -112,9 +115,69 @@ const EChartsChart: React.FC = () => {
     dispatch(updateTrendStyle(settings));
   };
 
+  // Обработчик переключения режима
+  const handleToggleMode = () => {
+    const newMode = chartMode === 'live' ? 'historical' : 'live';
+    
+    if (newMode === 'live') {
+      // Переключаемся на live режим
+      dispatch(setChartMode('live'));
+      dispatch(resetLiveData());
+      
+      // Подключаемся к WebSocket
+      const ws = createChartWebSocketConnection('ws://localhost:3000', {
+        onOpen: () => {
+          console.log('Chart WebSocket connected');
+        },
+        onMessage: (message: ChartWebSocketMessage) => {
+          if (message.type === 'chartData' && message.data) {
+            dispatch(updateLiveData({
+              voltage: message.data.voltage,
+              barValues: message.data.barValues,
+              elapsedSeconds: message.data.elapsedSeconds,
+            }));
+          }
+        },
+        onError: () => {
+          console.error('Chart WebSocket error');
+        },
+        onClose: () => {
+          console.log('Chart WebSocket disconnected');
+          wsRef.current = null;
+        },
+      });
+      wsRef.current = ws;
+    } else {
+      // Переключаемся на historical режим
+      dispatch(setChartMode('historical'));
+      
+      // Закрываем WebSocket соединение
+      if (wsRef.current) {
+        closeChartWebSocketConnection(wsRef.current);
+        wsRef.current = null;
+      }
+    }
+  };
+
+  // Очистка WebSocket при размонтировании
+  useEffect(() => {
+    return () => {
+      if (wsRef.current) {
+        closeChartWebSocketConnection(wsRef.current);
+        wsRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div style={{ width: '100%' }}>
-      <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
+      <div style={{ marginBottom: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <Button
+          label={chartMode === 'live' ? 'Historical' : 'Live'}
+          icon={chartMode === 'live' ? 'pi pi-history' : 'pi pi-wifi'}
+          onClick={handleToggleMode}
+          severity={chartMode === 'live' ? 'warning' : 'success'}
+        />
         <Button label="Увеличить (x2)" icon="pi pi-search-plus" onClick={zoomIn} />
         <Button label="Уменьшить (x2)" icon="pi pi-search-minus" onClick={zoomOut} />
         <Button label="Сбросить масштаб" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />

@@ -58,6 +58,29 @@ function generateRandomData() {
   };
 }
 
+// Функция для генерации данных графика (напряжение и гистограмма)
+function generateChartData(elapsedSeconds) {
+  // Генерируем случайное напряжение в диапазоне 200-240 В
+  const voltage = Math.random() * 40 + 200;
+  
+  // Генерируем случайные значения для каждого столбца гистограммы
+  // Значения будут суммироваться на клиенте
+  const barValues = [
+    Math.floor(Math.random() * 10),
+    Math.floor(Math.random() * 10),
+    Math.floor(Math.random() * 10),
+    Math.floor(Math.random() * 10),
+    Math.floor(Math.random() * 10),
+    Math.floor(Math.random() * 10),
+  ];
+  
+  return {
+    voltage: Number(voltage.toFixed(2)),
+    barValues: barValues,
+    elapsedSeconds: elapsedSeconds,
+  };
+}
+
 // Обработка подключений WebSocket
 wss.on('connection', (ws, req) => {
   const clientIp = req.socket.remoteAddress;
@@ -72,6 +95,10 @@ wss.on('connection', (ws, req) => {
 
   // Интервал для отправки случайных данных раз в секунду
   let dataInterval = null;
+  
+  // Интервал для отправки данных графика
+  let chartDataInterval = null;
+  let chartStartTime = null;
 
   // Обработка входящих сообщений от клиента
   ws.on('message', (message) => {
@@ -113,6 +140,43 @@ wss.on('connection', (ws, req) => {
           message: 'Data stream stopped',
           timestamp: new Date().toISOString()
         }));
+      } else if (data.type === 'startChart') {
+        // Запускаем поток данных для графика
+        if (chartDataInterval) {
+          clearInterval(chartDataInterval);
+        }
+        
+        chartStartTime = Date.now();
+        
+        // Отправляем данные раз в секунду
+        chartDataInterval = setInterval(() => {
+          if (ws.readyState === ws.OPEN) {
+            const elapsedSeconds = Math.floor((Date.now() - chartStartTime) / 1000);
+            const chartData = generateChartData(elapsedSeconds);
+            ws.send(JSON.stringify({
+              type: 'chartData',
+              data: chartData
+            }));
+          }
+        }, 1000);
+        
+        ws.send(JSON.stringify({
+          type: 'chartStarted',
+          message: 'Chart data stream started',
+          timestamp: new Date().toISOString()
+        }));
+      } else if (data.type === 'stopChart') {
+        // Останавливаем поток данных графика
+        if (chartDataInterval) {
+          clearInterval(chartDataInterval);
+          chartDataInterval = null;
+        }
+        chartStartTime = null;
+        ws.send(JSON.stringify({
+          type: 'chartStopped',
+          message: 'Chart data stream stopped',
+          timestamp: new Date().toISOString()
+        }));
       } else {
         // Эхо-ответ (отправляем обратно клиенту)
         ws.send(JSON.stringify({
@@ -134,21 +198,31 @@ wss.on('connection', (ws, req) => {
   // Обработка закрытия соединения
   ws.on('close', () => {
     console.log(`WebSocket client disconnected from ${clientIp}`);
-    // Очищаем интервал при отключении
+    // Очищаем интервалы при отключении
     if (dataInterval) {
       clearInterval(dataInterval);
       dataInterval = null;
     }
+    if (chartDataInterval) {
+      clearInterval(chartDataInterval);
+      chartDataInterval = null;
+    }
+    chartStartTime = null;
   });
 
   // Обработка ошибок
   ws.on('error', (error) => {
     console.error('WebSocket error:', error);
-    // Очищаем интервал при ошибке
+    // Очищаем интервалы при ошибке
     if (dataInterval) {
       clearInterval(dataInterval);
       dataInterval = null;
     }
+    if (chartDataInterval) {
+      clearInterval(chartDataInterval);
+      chartDataInterval = null;
+    }
+    chartStartTime = null;
   });
 });
 
