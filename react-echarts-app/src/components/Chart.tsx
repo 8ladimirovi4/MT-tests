@@ -4,6 +4,7 @@ import * as echarts from 'echarts';
 import { Button } from 'primereact/button';
 import { useChartZoom } from '../features/zoom';
 import { useFullscreen } from '../features/fullscreen';
+import { useChartDownload } from '../features/download';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
 import { updateTrendStyle } from '../store/chartSlice/chartSlice';
 import type { RootState } from '../store/store';
@@ -28,6 +29,9 @@ const EChartsChart: React.FC = () => {
     chartRef,
     chartInstance
   );
+
+  // Используем хук для скачивания графика
+  const { downloadChart } = useChartDownload(chartInstance);
 
   useEffect(() => {
     // Инициализируем экземпляр ECharts при монтировании компонента
@@ -97,7 +101,7 @@ const EChartsChart: React.FC = () => {
       <div style={{ marginBottom: '10px', display: 'flex', gap: '10px' }}>
         <Button label="Увеличить (x2)" icon="pi pi-search-plus" onClick={zoomIn} />
         <Button label="Уменьшить (x2)" icon="pi pi-search-minus" onClick={zoomOut} />
-        <Button label="Сбросить" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />
+        <Button label="Сбросить масштаб" icon="pi pi-refresh" onClick={resetZoom} severity="secondary" />
         {isFullscreenSupported && (
           <Button
             label={isFullscreen ? 'Выйти из полноэкранного режима' : 'Полноэкранный режим'}
@@ -106,6 +110,12 @@ const EChartsChart: React.FC = () => {
             severity="info"
           />
         )}
+        <Button
+          label="Скачать PNG"
+          icon="pi pi-download"
+          onClick={() => downloadChart()}
+          severity="success"
+        />
       </div>
       <div ref={chartRef} style={{ width: '100%', height: '400px' }} />
       <TrendStyleModal
