@@ -2,13 +2,19 @@ import http from 'http';
 import { WebSocketServer } from 'ws';
 
 const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 const startTime = Date.now();
 
+// Обработка graceful shutdown
+let isShuttingDown = false;
+
 const server = http.createServer((req, res) => {
-  // Устанавливаем заголовки CORS для разработки
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // Устанавливаем заголовки CORS
+  const origin = req.headers.origin;
+  res.setHeader('Access-Control-Allow-Origin', origin || '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Обработка OPTIONS запроса для CORS
   if (req.method === 'OPTIONS') {
@@ -20,7 +26,11 @@ const server = http.createServer((req, res) => {
   // Простой роутинг
   if (req.url === '/' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: 'Hello from Node.js server!' }));
+    res.end(JSON.stringify({ 
+      message: 'Hello from Node.js server!',
+      environment: NODE_ENV,
+      timestamp: new Date().toISOString()
+    }));
   } else if (req.url === '/api/health' && req.method === 'GET') {
     const serverUptime = Math.floor((Date.now() - startTime) / 1000);
     const healthData = {
@@ -31,7 +41,11 @@ const server = http.createServer((req, res) => {
         port: PORT,
         nodeVersion: process.version,
       },
-      environment: process.env.NODE_ENV || 'development',
+      environment: NODE_ENV,
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+      },
     };
     
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -226,8 +240,57 @@ wss.on('connection', (ws, req) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`HTTP Server is running on http://localhost:${PORT}`);
-  console.log(`WebSocket Server is running on ws://localhost:${PORT}`);
+// Обработка ошибок сервера
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', error);
+    process.exit(1);
+  }
+});
+
+// Обработка необработанных исключений
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  if (NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  if (NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  isShuttingDown = true;
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  isShuttingDown = true;
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+// Запуск сервера
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server started in ${NODE_ENV} mode`);
+  console.log(`📡 HTTP Server is running on port ${PORT}`);
+  console.log(`🔌 WebSocket Server is running on port ${PORT}`);
+  console.log(`🌐 Environment: ${NODE_ENV}`);
+  console.log(`📦 Node version: ${process.version}`);
 });
 
