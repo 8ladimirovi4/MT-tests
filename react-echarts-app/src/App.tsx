@@ -5,6 +5,7 @@ import DummiPage from './components/DummiPage'
 import WSSDataDisplay, { type WebSocketData } from './components/WSSDataDisplay'
 import RESTDataDisplay from './components/RESTDataDisplay'
 import { checkServerHealth, createWebSocketConnection, closeWebSocketConnection } from './api'
+import { config } from './config'
 import './App.css'
 
 function App() {
@@ -41,7 +42,7 @@ function App() {
       setWsData(null)
     } else {
       // Подключаемся к WebSocket
-      const ws = createWebSocketConnection('ws://localhost:3000', {
+      const ws = createWebSocketConnection(config.wsUrl, {
         onOpen: () => {
           setWsConnected(true)
         },

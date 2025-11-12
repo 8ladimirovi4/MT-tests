@@ -8,6 +8,7 @@ import { useChartDownload } from '../features/download';
 import { TrendStyleModal, type TrendStyleSettings } from '../features/trend-style';
 import { updateTrendStyle, updateYAxisVisibility, setChartMode, updateLiveData, resetLiveData, type ChartMode } from '../store/chartSlice/chartSlice';
 import { createChartWebSocketConnection, closeChartWebSocketConnection, type ChartWebSocketMessage } from '../api/chartWebSocketApi';
+import { config } from '../config';
 import type { RootState } from '../store/store';
 
 const EChartsChart: React.FC = () => {
@@ -136,7 +137,7 @@ const EChartsChart: React.FC = () => {
       setVoltageDataCount(0);
       
       // Подключаемся к WebSocket
-      const ws = createChartWebSocketConnection('ws://localhost:3000', {
+      const ws = createChartWebSocketConnection(config.wsUrl, {
         onOpen: () => {
           console.log('Chart WebSocket connected');
         },
