@@ -1,34 +1,25 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from './auth/AuthContext'
 import { CARD_CATALOG } from './cardCatalog'
 import {
   readSelectedCardId,
   SELECTED_CARD_ID_EVENT,
 } from './selectedCardIdStorage'
-import {
-  readSimulatedSession,
-  SIMULATED_SESSION_EVENT,
-} from './simulatedSessionStorage'
 import './CardSidebar.css'
 import { upsertSavedCard, type StorableCard } from './savedCardsStorage'
 
 export function CardSidebar() {
+  const { user } = useAuth()
+  const sessionActive = user !== null
+
   const [activeId, setActiveId] = useState<string | null>(() =>
     readSelectedCardId(),
-  )
-  const [sessionActive, setSessionActive] = useState(
-    () => readSimulatedSession() !== null,
   )
 
   useEffect(() => {
     const syncSelection = () => setActiveId(readSelectedCardId())
     window.addEventListener(SELECTED_CARD_ID_EVENT, syncSelection)
     return () => window.removeEventListener(SELECTED_CARD_ID_EVENT, syncSelection)
-  }, [])
-
-  useEffect(() => {
-    const syncSession = () => setSessionActive(readSimulatedSession() !== null)
-    window.addEventListener(SIMULATED_SESSION_EVENT, syncSession)
-    return () => window.removeEventListener(SIMULATED_SESSION_EVENT, syncSession)
   }, [])
 
   const saveCardToSession = (card: StorableCard) => {
@@ -40,7 +31,7 @@ export function CardSidebar() {
       <p className="card-sidebar__heading">Id в каталоге</p>
       {!sessionActive && (
         <p className="card-sidebar__lock-hint">
-          Создайте сессию выше, чтобы открыть каталог.
+          Войдите в блоке выше, чтобы открыть каталог.
         </p>
       )}
       <ul className="card-sidebar__list">
@@ -58,7 +49,7 @@ export function CardSidebar() {
               title={
                 sessionActive
                   ? card.title
-                  : 'Сначала создайте сессию в блоке «Имитация сессии»'
+                  : 'Сначала войдите в блоке «Сессия (сервер…)»'
               }
             >
               <span className="card-sidebar__id">{card.id}</span>

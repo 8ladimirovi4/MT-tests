@@ -1,6 +1,6 @@
 export const SAVED_CARDS_SESSION_KEY = 'sandbox-saved-cards'
 
-/** Срабатывает при любом изменении массива в sessionStorage (добавление, правка, удаление, полная очистка). */
+/** Срабатывает при любом изменении массива в хранилище (та же вкладка). */
 export const SAVED_CARDS_CHANGED_EVENT = 'sandbox-saved-cards-changed'
 
 function notifySavedCardsChanged(): void {
@@ -23,15 +23,32 @@ function isStorableCard(value: unknown): value is StorableCard {
   )
 }
 
-export function readSavedCards(): StorableCard[] {
+/** Однократный перенос из sessionStorage (старый симулятор) в localStorage. */
+function migrateFromSessionStorageIfNeeded(): boolean {
   try {
-    const raw = sessionStorage.getItem(SAVED_CARDS_SESSION_KEY)
+    if (localStorage.getItem(SAVED_CARDS_SESSION_KEY)) return false
+    const legacy = sessionStorage.getItem(SAVED_CARDS_SESSION_KEY)
+    if (!legacy) return false
+    localStorage.setItem(SAVED_CARDS_SESSION_KEY, legacy)
+    sessionStorage.removeItem(SAVED_CARDS_SESSION_KEY)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function readSavedCards(): StorableCard[] {
+  if (migrateFromSessionStorageIfNeeded()) {
+    notifySavedCardsChanged()
+  }
+  try {
+    const raw = localStorage.getItem(SAVED_CARDS_SESSION_KEY)
     if (!raw) return []
     const data = JSON.parse(raw) as unknown
     if (!Array.isArray(data)) return []
     return data.filter(isStorableCard)
   } catch {
-    sessionStorage.removeItem(SAVED_CARDS_SESSION_KEY)
+    localStorage.removeItem(SAVED_CARDS_SESSION_KEY)
     notifySavedCardsChanged()
     return []
   }
@@ -46,23 +63,23 @@ export function upsertSavedCard(card: StorableCard): void {
   } else {
     list.push(card)
   }
-  sessionStorage.setItem(SAVED_CARDS_SESSION_KEY, JSON.stringify(list))
+  localStorage.setItem(SAVED_CARDS_SESSION_KEY, JSON.stringify(list))
   notifySavedCardsChanged()
 }
 
-/** Удаляет карточку по `id`. Если массив пустеет — ключ убирается из sessionStorage. */
+/** Удаляет карточку по `id`. Если массив пустеет — ключ убирается из localStorage. */
 export function removeSavedCard(id: string): void {
   const list = readSavedCards().filter((c) => c.id !== id)
   if (list.length === 0) {
-    sessionStorage.removeItem(SAVED_CARDS_SESSION_KEY)
+    localStorage.removeItem(SAVED_CARDS_SESSION_KEY)
   } else {
-    sessionStorage.setItem(SAVED_CARDS_SESSION_KEY, JSON.stringify(list))
+    localStorage.setItem(SAVED_CARDS_SESSION_KEY, JSON.stringify(list))
   }
   notifySavedCardsChanged()
 }
 
-/** Удаляет все сохранённые карточки из sessionStorage. */
+/** Удаляет все сохранённые карточки из localStorage. */
 export function clearAllSavedCards(): void {
-  sessionStorage.removeItem(SAVED_CARDS_SESSION_KEY)
+  localStorage.removeItem(SAVED_CARDS_SESSION_KEY)
   notifySavedCardsChanged()
 }

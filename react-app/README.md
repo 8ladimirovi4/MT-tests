@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# React-приложение (песочница)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Синхронизация карточек между вкладками
 
-Currently, two official plugins are available:
+Карточки хранятся в **`localStorage`** под ключом `sandbox-saved-cards` (массив объектов). Для одного origin (например `http://localhost:5173`) это хранилище **общее для всех вкладок**: после записи данные уже «одинаковые» на диске браузера.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Чтобы **интерфейс** во всех вкладках обновился без перезагрузки, используются два механизма:
 
-## React Compiler
+1. **Текущая вкладка** — после любой записи в `localStorage` вызывается кастомное событие `sandbox-saved-cards-changed` (в коде — `SAVED_CARDS_CHANGED_EVENT`). Компоненты подписаны на него и заново читают массив из `localStorage`.
+2. **Другие вкладки** — браузер сам генерирует событие **`storage`** на `window`; в обработчике снова читается `localStorage` и обновляется состояние React.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Событие **`storage`** не приходит в той вкладке, которая сама вызвала `setItem` / `removeItem`, поэтому одного только `storage` недостаточно.
 
-## Expanding the ESLint configuration
+Ниже — концептуальные блок-схемы в Mermaid.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Общая архитектура
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```mermaid
+flowchart TB
+  subgraph storage["Браузер: localStorage"]
+    KEY["Ключ: sandbox-saved-cards"]
+  end
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  subgraph tabA["Вкладка A"]
+    UA["Действие: добавить / удалить карточку"]
+    WA["upsertSavedCard / removeSavedCard"]
+    LA["localStorage.setItem / removeItem"]
+    CA["CustomEvent: sandbox-saved-cards-changed"]
+    RUA["readSavedCards() → setState"]
+    UA --> WA --> LA
+    LA --> CA
+    CA --> RUA
+    LA -.->|данные общие| KEY
+  end
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  subgraph tabB["Вкладка B"]
+    SB["Событие storage (браузер)"]
+    RUB["readSavedCards() → setState"]
+    SB --> RUB
+  end
+
+  KEY -.->|изменение видно другим вкладкам| SB
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Создание или обновление карточки (одна вкладка пишет)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```mermaid
+sequenceDiagram
+  participant User as Пользователь (вкладка A)
+  participant App as Код приложения
+  participant LS as localStorage
+  participant Win as window
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  User->>App: Сохранить карточку (каталог / другое действие)
+  App->>LS: setItem(sandbox-saved-cards, JSON)
+  App->>Win: dispatchEvent(CustomEvent changed)
+  Win->>App: Обработчики во вкладке A
+  App->>LS: readSavedCards()
+  App->>App: setCards(...) — UI обновлён в A
+
+  Note over LS,Win: Во вкладке B CustomEvent не приходит
+
+  LS-->>Win: браузер: storage (только в B)
+  Win->>App: Обработчики во вкладке B
+  App->>LS: readSavedCards()
+  App->>App: setCards(...) — UI обновлён в B
 ```
+
+### Удаление карточки
+
+```mermaid
+flowchart LR
+  subgraph del["Вкладка, где нажали «Закрыть» или «Удалить»"]
+    D1["removeSavedCard(id)"]
+    D2["filter массива → setItem или removeItem"]
+    D3["notifySavedCardsChanged()"]
+    D1 --> D2 --> D3
+  end
+
+  D3 --> E1["CustomEvent → эта вкладка перечитала LS"]
+  D2 --> E2["storage → остальные вкладки перечитали LS"]
+```
+
+В требованиях не обновление других вкладок должно происходить только после обновелния страницы. За синхронное обновление отвечает
+```
+ window.addEventListener('storage', onStorage)
+ ```
+и
+```
+notifySavedCardsChanged()
+```
+### Связь с «сессией» (JWT)
+
+Серверная сессия (**httpOnly cookie** после логина) задаёт, **кто** может работать с приложением (например, открыт каталог). Сами карточки по-прежнему лежат во **`localStorage`** и синхронизируются между вкладками по схеме выше. При **выходе** из аккаунта список карточек в `localStorage` очищается вместе с cookie на стороне клиента (см. `AuthContext`).

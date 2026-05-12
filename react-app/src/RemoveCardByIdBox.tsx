@@ -3,6 +3,7 @@ import {
   readSavedCards,
   removeSavedCard,
   SAVED_CARDS_CHANGED_EVENT,
+  SAVED_CARDS_SESSION_KEY,
 } from './savedCardsStorage'
 import './RemoveCardByIdBox.css'
 
@@ -16,7 +17,18 @@ export function RemoveCardByIdBox() {
   useEffect(() => {
     const sync = () => setIdsInSession(readSavedCards().map((c) => c.id))
     window.addEventListener(SAVED_CARDS_CHANGED_EVENT, sync)
-    return () => window.removeEventListener(SAVED_CARDS_CHANGED_EVENT, sync)
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.storageArea !== localStorage) return
+      if (e.key !== null && e.key !== SAVED_CARDS_SESSION_KEY) return
+      sync()
+    }
+    window.addEventListener('storage', onStorage)
+
+    return () => {
+      window.removeEventListener(SAVED_CARDS_CHANGED_EVENT, sync)
+      window.removeEventListener('storage', onStorage)
+    }
   }, [])
 
   const handleRemove = () => {
@@ -28,12 +40,12 @@ export function RemoveCardByIdBox() {
     }
     const exists = readSavedCards().some((c) => c.id === id)
     if (!exists) {
-      setHint('В сессии нет карточки с таким id.')
+      setHint('В хранилище нет карточки с таким id.')
       return
     }
     removeSavedCard(id)
     setIdInput('')
-    setHint('Карточка удалена из сессии.')
+    setHint('Карточка удалена.')
     window.setTimeout(() => setHint(null), 2400)
   }
 
@@ -45,9 +57,9 @@ export function RemoveCardByIdBox() {
   return (
     <section className="remove-by-id" aria-labelledby="remove-by-id-heading">
       <h2 id="remove-by-id-heading" className="remove-by-id__title">
-      Удаление по id из сессии если дерево обновилос
+        Удаление по id из localStorage
       </h2>
-      <p className="remove-by-id__label">Id в sessionStorage сейчас</p>
+      <p className="remove-by-id__label">Id в localStorage сейчас</p>
       {idsInSession.length === 0 ? (
         <p className="remove-by-id__ids remove-by-id__ids--empty">нет сохранённых карточек</p>
       ) : (
@@ -74,7 +86,7 @@ export function RemoveCardByIdBox() {
             autoComplete="off"
           />
           <button type="submit" className="remove-by-id__btn">
-            Удалить из сессии
+            Удалить
           </button>
         </div>
       </form>

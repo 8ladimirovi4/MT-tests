@@ -4,22 +4,31 @@ import {
   readSavedCards,
   removeSavedCard,
   SAVED_CARDS_CHANGED_EVENT,
+  SAVED_CARDS_SESSION_KEY,
   type StorableCard,
 } from './savedCardsStorage'
 
 function Cards() {
   const [cards, setCards] = useState<StorableCard[]>(() => readSavedCards())
 
-
   useEffect(() => {
     const syncFromStorage = () => {
       setCards(readSavedCards())
     }
     window.addEventListener(SAVED_CARDS_CHANGED_EVENT, syncFromStorage)
-    return () =>
-      window.removeEventListener(SAVED_CARDS_CHANGED_EVENT, syncFromStorage)
-  }, [])
 
+    const onStorage = (e: StorageEvent) => {
+      if (e.storageArea !== localStorage) return
+      if (e.key !== null && e.key !== SAVED_CARDS_SESSION_KEY) return
+      syncFromStorage()
+    }
+    window.addEventListener('storage', onStorage)
+
+    return () => {
+      window.removeEventListener(SAVED_CARDS_CHANGED_EVENT, syncFromStorage)
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [])
 
   const closeCard = (id: string) => {
     removeSavedCard(id)
@@ -30,7 +39,8 @@ function Cards() {
       <h1 className="app__title">Карточки</h1>
       {cards.length === 0 ? (
         <p className="app__empty">
-          В sessionStorage нет сохранённых карточек — список пуст.
+          В localStorage нет сохранённых карточек — список пуст (данные общие для
+          всех вкладок этого сайта).
         </p>
       ) : (
         <ul className="card-grid">

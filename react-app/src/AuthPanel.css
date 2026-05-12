@@ -1,0 +1,126 @@
+.auth-panel {
+  margin-bottom: 28px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--code-bg);
+}
+
+.auth-panel__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.auth-panel__hint {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.auth-panel__hint code {
+  font-size: 13px;
+}
+
+.auth-panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+}
+
+.auth-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.auth-panel__input {
+  font: inherit;
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.auth-panel__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.auth-panel__input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-panel__error {
+  margin: 0;
+  font-size: 14px;
+  color: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .auth-panel__error {
+    color: #fca5a5;
+  }
+}
+
+.auth-panel__btn {
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  align-self: flex-start;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.auth-panel__btn:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.auth-panel__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.auth-panel__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.auth-panel__btn--ghost {
+  background: transparent;
+}
+
+.auth-panel__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.auth-panel__status {
+  margin: 0;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.auth-panel__user {
+  margin: 0;
+}
+
+.auth-panel__user code {
+  font-size: 15px;
+  padding: 4px 8px;
+}
